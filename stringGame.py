@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 win = pygame.display.set_mode([500,700])
 
-previous_point = None
+previous_point = (250,650)
 win.fill((255,255,255))
 
 def draw_mousePos(event):
