@@ -1,5 +1,4 @@
 import pygame
-import turtle
 
 pygame.init()
 win = pygame.display.set_mode([500,700])
@@ -31,8 +30,13 @@ def drawAll(cameraShift):
     for i in range(len(prevLine)):
         first = prevLine[i][0]
         last = prevLine[i][1]
-        pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
-        
+        if i != (len(prevLine)-1):
+            pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
+        else:
+            pygame.draw.line(win,color.black, (first[0], first[1]+ cameraShift), last, 10)
+
+# Something about y  + camOffset > 0 then just save the value as somethign IDK hopefully you remember this
+
 def reset():
     global prevLine, previous_point
     prevLine.clear()
@@ -73,6 +77,7 @@ def main():
 
         if ball.y < 350:
             cameraShift = -ball.y + win.get_height()/2 - 20
+            print(cameraShift)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
