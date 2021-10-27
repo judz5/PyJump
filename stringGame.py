@@ -9,7 +9,17 @@ prevLine = [[(250,650), (250,650)]]
 previous_point = (250,650)
 cameraShift = 0
 
-def draw_mousePos(event):
+#colors
+class color():
+
+    black = (0,0,0) # normal string
+    navy = (20,33,61) # maybe some kind of special string
+    orange = (252, 163, 17) # ball
+    grey = (229, 229, 229) # background 
+    white = (255,255,255)
+
+
+def draw_mousePos(event, cameraShift):
     global previous_point
     click_pos = event.pos
     if previous_point != None:
@@ -21,7 +31,7 @@ def drawAll(cameraShift):
     for i in range(len(prevLine)):
         first = prevLine[i][0]
         last = prevLine[i][1]
-        pygame.draw.line(win, (0,0,0), (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
+        pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
         
 def reset():
     global prevLine, previous_point
@@ -45,7 +55,7 @@ class Ball:
         self.x = x
 
     def drawBall(self,cameraShift):
-        pygame.draw.circle(win, (0,0,255), (self.x, self.y+cameraShift), 20)
+        pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
 
 def main():
     run = True
@@ -68,11 +78,11 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                draw_mousePos(event)
+                draw_mousePos(event, cameraShift)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 reset()
         pygame.display.update()
-        win.fill((255,255,255))
+        win.fill(color.grey)
         drawAll(cameraShift)
         ball.drawBall(cameraShift)
     pygame.quit()
