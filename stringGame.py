@@ -7,6 +7,7 @@ win = pygame.display.set_mode([500,700])
 prevLine = [[(250,650), (250,650)]]
 
 previous_point = (250,650)
+cameraShift = 0
 
 def draw_mousePos(event):
     global previous_point
@@ -16,11 +17,11 @@ def draw_mousePos(event):
         previous_point = None
     previous_point = click_pos
     
-def drawAll():
+def drawAll(cameraShift):
     for i in range(len(prevLine)):
         first = prevLine[i][0]
         last = prevLine[i][1]
-        pygame.draw.line(win, (0,0,0), first, last, 10)
+        pygame.draw.line(win, (0,0,0), (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
         
 def reset():
     global prevLine, previous_point
@@ -43,19 +44,26 @@ class Ball:
     def setX(self, x):
         self.x = x
 
-    def drawBall(self):
-        pygame.draw.circle(win, (0,0,255), (self.x, self.y), 20)
+    def drawBall(self,cameraShift):
+        pygame.draw.circle(win, (0,0,255), (self.x, self.y+cameraShift), 20)
 
 def main():
     run = True
     ball = Ball()
     clock = pygame.time.Clock()
+    cameraShift = 0
     while run:
-        clock.tick(30)
+        clock.tick(60)
+
         ball.dy += ball.gravity
         ball.setY(ball.y + ball.dy)
+
         if ball.y > 680:
-            ball.dy *= -1
+            ball.dy *= -1.1
+
+        if ball.y < 350:
+            cameraShift = -ball.y + win.get_height()/2 - 20
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -65,8 +73,8 @@ def main():
                 reset()
         pygame.display.update()
         win.fill((255,255,255))
-        drawAll()
-        ball.drawBall()
+        drawAll(cameraShift)
+        ball.drawBall(cameraShift)
     pygame.quit()
 
 
