@@ -5,6 +5,8 @@ win = pygame.display.set_mode([500,700])
 
 prevLine = [[(250,650), (250,650)]]
 
+strings = []
+
 previous_point = (250,650)
 cameraShift = 0
 
@@ -16,6 +18,29 @@ class color():
     orange = (252, 163, 17) # ball
     grey = (229, 229, 229) # background 
     white = (255,255,255)
+
+class string:
+    def __init__(self):
+        self.x1 = None
+        self.y1 = None
+        self.x2 = None
+        self.y2 = None
+
+    def setStart(self, pos):
+        self.x1 = pos[0]
+        self.y1 = pos[1]
+
+    def setEnd(self, pos):
+        self.x2 = pos[0]
+        self.y2 = pos[1]
+
+    def drawString(self, cameraShift):
+        if self.x2 != None and self.y2 != None:
+            pygame.draw.line(win, color.black, (self.x1, self.y1 + cameraShift), (self.x2, self.y2 + cameraShift), 10)
+        else:
+            # option 1 : change vals to tuples??
+            # option 2 : just use x and y and change tuples to x,y when i pass them in idk figure it out 
+            
 
 
 def draw_mousePos(event, cameraShift):
