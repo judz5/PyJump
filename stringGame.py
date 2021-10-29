@@ -40,8 +40,10 @@ class string:
         else:
             # option 1 : change vals to tuples??
             # option 2 : just use x and y and change tuples to x,y when i pass them in idk figure it out 
+            self.x2 = self.x1
+            self.y2 = self.y1              
             
-
+ # Yo im out here usin vim and shi movin quick its kinda nice actually i might learn it more
 
 def draw_mousePos(event, cameraShift):
     global previous_point
@@ -116,7 +118,6 @@ def main():
         drawAll(cameraShift)
         ball.drawBall(cameraShift)
     pygame.quit()
-
 
 
 main()
