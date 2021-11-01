@@ -19,50 +19,45 @@ class color():
     grey = (229, 229, 229) # background 
     white = (255,255,255)
 
-class string:
-    def __init__(self):
-        self.x1 = None
-        self.y1 = None
-        self.x2 = None
-        self.y2 = None
+# class string:
+#     def __init__(self, event):
+#         self.x1 = event.pos[0]
+#         self.y1 = None
+#         self.x2 = None
+#         self.y2 = None
 
-    def setStart(self, pos):
-        self.x1 = pos[0]
-        self.y1 = pos[1]
+#     def setStart(self, pos):
+#         self.x1 = pos[0]
+#         self.y1 = pos[1]
 
-    def setEnd(self, pos):
-        self.x2 = pos[0]
-        self.y2 = pos[1]
+#     def setEnd(self, pos):
+#         self.x2 = pos[0]
+#         self.y2 = pos[1]
 
-    def drawString(self, cameraShift):
-        if self.x2 != None and self.y2 != None:
-            pygame.draw.line(win, color.black, (self.x1, self.y1 + cameraShift), (self.x2, self.y2 + cameraShift), 10)
-        else:
-            # option 1 : change vals to tuples??
-            # option 2 : just use x and y and change tuples to x,y when i pass them in idk figure it out 
-            self.x2 = self.x1
-            self.y2 = self.y1              
-            
- # Yo im out here usin vim and shi movin quick its kinda nice actually i might learn it more
+#     def drawString(self, cameraShift):
+#         if self.x2 != None and self.y2 != None:
+#             pygame.draw.line(win, color.black, (self.x1, self.y1 + cameraShift), (self.x2, self.y2 + cameraShift), 10)
+#         else:
+#             self.x2 = self.x1
+#             self.y2 = self.y1              
 
-def draw_mousePos(event, cameraShift):
+def addLine(event, cameraShift):
     global previous_point
-    click_pos = event.pos
+
+    x = event.pos[0]
+    y = event.pos[1] + cameraShift
+    
     if previous_point != None:
-        prevLine.append([previous_point, click_pos])
+        prevLine.append([previous_point, (x,y)])
         previous_point = None
-    previous_point = click_pos
+    previous_point = (x,y)
     
 def drawAll(cameraShift):
     for i in range(len(prevLine)):
         first = prevLine[i][0]
         last = prevLine[i][1]
-        if i != (len(prevLine)-1):
-            pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
-        else:
-            pygame.draw.line(win,color.black, (first[0], first[1]+ cameraShift), last, 10)
-
-# Something about y  + camOffset > 0 then just save the value as somethign IDK hopefully you remember this
+        pygame.draw.line(win, color.black, (first[0], first[1]), (last[0], last[1] + cameraShift), 10)
+       
 
 def reset():
     global prevLine, previous_point
@@ -104,13 +99,13 @@ def main():
 
         if ball.y < 350:
             cameraShift = -ball.y + win.get_height()/2 - 20
-            print(cameraShift)
+            
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                draw_mousePos(event, cameraShift)
+                addLine(event, cameraShift)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 reset()
         pygame.display.update()
