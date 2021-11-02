@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 win = pygame.display.set_mode([500,700])
 
-prevLine = [[(250,650), (250,650)]]
+prevLine = []
 
 strings = []
 
@@ -43,21 +43,23 @@ class color():
 
 def addLine(event, cameraShift):
     global previous_point
-
     x = event.pos[0]
-    y = event.pos[1] + cameraShift
-    
-    if previous_point != None:
-        prevLine.append([previous_point, (x,y)])
-        previous_point = None
+    y = event.pos[1] - cameraShift
+
+    line = [previous_point, (x,y)]
+    prevLine.append(line)
+    print(prevLine)
     previous_point = (x,y)
     
 def drawAll(cameraShift):
     for i in range(len(prevLine)):
         first = prevLine[i][0]
         last = prevLine[i][1]
-        pygame.draw.line(win, color.black, (first[0], first[1]), (last[0], last[1] + cameraShift), 10)
-       
+        # if last[1] > win.get_height():
+        #     pygame.draw.line(win, color.black, (first[0], first[1]), (last[0], last[1]+cameraShift), 10)
+        # pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
+        pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
+
 
 def reset():
     global prevLine, previous_point
