@@ -7,7 +7,7 @@ prevLine = []
 
 strings = []
 
-previous_point = (250,650)
+previous_point = (250,700)
 cameraShift = 0
 
 #colors
@@ -48,7 +48,6 @@ def addLine(event, cameraShift):
 
     line = [previous_point, (x,y)]
     prevLine.append(line)
-    print(prevLine)
     previous_point = (x,y)
     
 def drawAll(cameraShift):
@@ -84,6 +83,9 @@ class Ball:
 
     def drawBall(self,cameraShift):
         pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
+    
+    #bounce_angle = math.radians(mirror_angle(math.degrees(math.atan2(-player_velocity[1], -player_velocity[0])), math.degrees(normal)) % 360)
+ 
 
 def main():
     run = True
