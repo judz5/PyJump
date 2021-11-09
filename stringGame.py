@@ -54,10 +54,8 @@ def drawAll(cameraShift):
     for i in range(len(prevLine)):
         first = prevLine[i][0]
         last = prevLine[i][1]
-        # if last[1] > win.get_height():
-        #     pygame.draw.line(win, color.black, (first[0], first[1]), (last[0], last[1]+cameraShift), 10)
-        # pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
         pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
+
 
 
 def reset():
