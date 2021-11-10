@@ -3,11 +3,12 @@ import pygame
 pygame.init()
 win = pygame.display.set_mode([500,700])
 
-lines = [fir]
 
-fir = line((250,700), (250,700))
+lines = []
+
+
 cameraShift = 0
-prePoint = (250,700)
+prePoint = None
 
 #colors
 class color():
@@ -18,7 +19,7 @@ class color():
     grey = (229, 229, 229) # background 
     white = (255,255,255)
 
-class line:
+class Line:
     def __init__(self, pos, prev):
         self.pos = pos
         self.pre =  prev
@@ -33,32 +34,7 @@ class line:
         return self.pre
 
     def drawLine(self, cameraShift):
-        pygame.draw.line(win, color.black, (pre[0], pre[1]+cameraShift), (pos[0], pos[1]+cameraShift), 10)
-
-
-def addLine(event, cameraShift):
-    global previous_point
-    x = event.pos[0]
-    y = event.pos[1] - cameraShift
-
-    line = [previous_point, (x,y)]
-    prevLine.append(line)
-    previous_point = (x,y)
-    
-def drawAll(cameraShift):
-    for i in range(len(prevLine)):
-        first = prevLine[i][0]
-        last = prevLine[i][1]
-        pygame.draw.line(win, color.black, (first[0], first[1]+cameraShift), (last[0], last[1]+cameraShift), 10)
-
-
-
-def reset():
-    global prevLine, previous_point
-    prevLine.clear()
-    prevLine.append([(250,650), (250,650)])
-    previous_point = (250,650)
-    win.fill((255,255,255))
+        pygame.draw.line(win, color.black, (self.pre[0], self.pre[1]+cameraShift), (self.pos[0], self.pos[1]+cameraShift), 10)
 
 class Ball:
     def __init__(self):
@@ -76,15 +52,22 @@ class Ball:
 
     def drawBall(self,cameraShift):
         pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
-    
-    #bounce_angle = math.radians(mirror_angle(math.degrees(math.atan2(-player_velocity[1], -player_velocity[0])), math.degrees(normal)) % 360)
  
+def reset():
+    global prevLine, previous_point
+    prevLine.clear()
+    prevLine.append([(250,650), (250,650)])
+    previous_point = (250,650)
+    win.fill((255,255,255))
 
 def main():
     run = True
     ball = Ball()
     clock = pygame.time.Clock()
     cameraShift = 0
+    fir = Line((250,700), (250,700))
+    lines.append(fir)
+    prePoint = (250,700)
     while run:
         clock.tick(60)
 
@@ -102,7 +85,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                lines.append(line((event.pos[0], event.pos[1]-cameraShift), prePoint))
+                lines.append(Line((event.pos[0], event.pos[1]-cameraShift), prePoint))
                 prePoint = (event.pos[0], event.pos[1]-cameraShift)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 reset()
