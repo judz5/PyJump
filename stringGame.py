@@ -3,12 +3,11 @@ import pygame
 pygame.init()
 win = pygame.display.set_mode([500,700])
 
-prevLine = []
+lines = [fir]
 
-strings = []
-
-previous_point = (250,700)
+fir = line((250,700), (250,700))
 cameraShift = 0
+prePoint = (250,700)
 
 #colors
 class color():
@@ -19,27 +18,23 @@ class color():
     grey = (229, 229, 229) # background 
     white = (255,255,255)
 
-# class string:
-#     def __init__(self, event):
-#         self.x1 = event.pos[0]
-#         self.y1 = None
-#         self.x2 = None
-#         self.y2 = None
+class line:
+    def __init__(self, pos, prev):
+        self.pos = pos
+        self.pre =  prev
+    
+    def setPre(self, pos):
+        self.pre = pos
 
-#     def setStart(self, pos):
-#         self.x1 = pos[0]
-#         self.y1 = pos[1]
+    def getPos(self):
+        return self.pos
 
-#     def setEnd(self, pos):
-#         self.x2 = pos[0]
-#         self.y2 = pos[1]
+    def getPre(self):
+        return self.pre
 
-#     def drawString(self, cameraShift):
-#         if self.x2 != None and self.y2 != None:
-#             pygame.draw.line(win, color.black, (self.x1, self.y1 + cameraShift), (self.x2, self.y2 + cameraShift), 10)
-#         else:
-#             self.x2 = self.x1
-#             self.y2 = self.y1              
+    def drawLine(self, cameraShift):
+        pygame.draw.line(win, color.black, (pre[0], pre[1]+cameraShift), (pos[0], pos[1]+cameraShift), 10)
+
 
 def addLine(event, cameraShift):
     global previous_point
@@ -107,12 +102,14 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                addLine(event, cameraShift)
+                lines.append(line((event.pos[0], event.pos[1]-cameraShift), prePoint))
+                prePoint = (event.pos[0], event.pos[1]-cameraShift)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 reset()
         pygame.display.update()
         win.fill(color.grey)
-        drawAll(cameraShift)
+        for line in lines:
+            line.drawLine(cameraShift)
         ball.drawBall(cameraShift)
     pygame.quit()
 
