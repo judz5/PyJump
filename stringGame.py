@@ -80,7 +80,6 @@ def main():
         if ball.y < 350:
             cameraShift = -ball.y + win.get_height()/2 - 20
             
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
