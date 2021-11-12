@@ -23,15 +23,13 @@ class Line:
     def __init__(self, pos, prev):
         self.pos = pos
         self.pre =  prev
+        self.line_rect = None
     
     def setPre(self, pos):
         self.pre = pos
 
     def getPos(self):
         return self.pos
-
-    def getPre(self):
-        return self.pre
 
     def drawLine(self, cameraShift):
         pygame.draw.line(win, color.black, (self.pre[0], self.pre[1]+cameraShift), (self.pos[0], self.pos[1]+cameraShift), 10)
@@ -43,6 +41,7 @@ class Ball:
         self.dx = 0
         self.dy = 0
         self.gravity = 0.3
+        self.ball_rect = pygame.Rect(self.x,self.y,40,40)
 
     def setY(self, y):
         self.y = y
@@ -51,8 +50,12 @@ class Ball:
         self.x = x
 
     def drawBall(self,cameraShift):
+        self.ball_rect = pygame.Rect(self.x-20, self.y+cameraShift-20, 40,40)
         pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
- 
+
+    def getRect(self):
+        return self.ball_rect
+
 def reset():
     global prevLine, previous_point
     prevLine.clear()
