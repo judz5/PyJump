@@ -1,11 +1,10 @@
 import pygame
+import math
 
 pygame.init()
 win = pygame.display.set_mode([500,700])
 
-
-lines = []
-
+platforms = []
 
 cameraShift = 0
 prePoint = None
@@ -19,25 +18,24 @@ class color():
     grey = (229, 229, 229) # background 
     white = (255,255,255)
 
-class Line:
-    def __init__(self, pos, prev):
+class Platform:
+    def __init__(self, pos):
         self.pos = pos
-        self.pre =  prev
-        self.line_rect = None
-    
+
     def setPre(self, pos):
         self.pre = pos
 
     def getPos(self):
         return self.pos
 
-    def drawLine(self, cameraShift):
-        pygame.draw.line(win, color.black, (self.pre[0], self.pre[1]+cameraShift), (self.pos[0], self.pos[1]+cameraShift), 10)
+    def drawPlatform(self, cameraShift):
+        pygame.draw.rect(win, color.black, (self.pos[0]-37, (self.pos[1]-5)+cameraShift, 75, 10))
 
 class Ball:
     def __init__(self):
         self.x = 250
         self.y = 350
+        self.pos = (self.x, self.y)
         self.dx = 0
         self.dy = 0
         self.gravity = 0.3
@@ -49,6 +47,12 @@ class Ball:
     def setX(self, x):
         self.x = x
 
+    def moveX(self, x):
+        self.x += x
+
+    def get_pos(self):
+        return self.pos
+
     def drawBall(self,cameraShift):
         self.ball_rect = pygame.Rect(self.x-20, self.y+cameraShift-20, 40,40)
         pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
@@ -57,45 +61,54 @@ class Ball:
         return self.ball_rect
 
 def reset():
-    global prevLine, previous_point
-    prevLine.clear()
-    prevLine.append([(250,650), (250,650)])
-    previous_point = (250,650)
+    global platforms
+    platforms.clear()
     win.fill((255,255,255))
 
 def main():
+    global platforms
     run = True
     ball = Ball()
     clock = pygame.time.Clock()
     cameraShift = 0
-    fir = Line((250,700), (250,700))
-    lines.append(fir)
-    prePoint = (250,700)
     while run:
+        win.fill(color.grey)
         clock.tick(60)
 
         ball.dy += ball.gravity
         ball.setY(ball.y + ball.dy)
 
         if ball.y > 680:
-            ball.dy *= -1.1
+            ball.dy *= -1
 
         if ball.y < 350:
             cameraShift = -ball.y + win.get_height()/2 - 20
-            
+
+        moveLeft = False
+        moveRight = False
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                lines.append(Line((event.pos[0], event.pos[1]-cameraShift), prePoint))
-                prePoint = (event.pos[0], event.pos[1]-cameraShift)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                reset()
-        pygame.display.update()
-        win.fill(color.grey)
-        for line in lines:
-            line.drawLine(cameraShift)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    moveLeft = True
+                if event.key == pygame.K_d:
+                    moveRight = True
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_a:
+                    moveLeft = False
+                if event.key == pygame.K_d:
+                    moveRight = False
+
+        if moveLeft:
+            ball.moveX(-10)
+        if moveRight:
+            ball.moveX(10)
+
         ball.drawBall(cameraShift)
+        pygame.display.update()
+ 
     pygame.quit()
 
 
