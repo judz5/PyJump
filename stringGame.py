@@ -1,5 +1,6 @@
 import pygame
 import math
+from random import randrange
 
 pygame.init()
 win = pygame.display.set_mode([500,700])
@@ -19,17 +20,18 @@ class color():
     white = (255,255,255)
 
 class Platform:
-    def __init__(self, pos):
-        self.pos = pos
+    def __init__(self):
+        self.x = randrange(501)
+        self.y = 0
 
-    def setPre(self, pos):
-        self.pre = pos
+    def setY(self, y):
+        self.y = y
 
     def getPos(self):
         return self.pos
 
     def drawPlatform(self, cameraShift):
-        pygame.draw.rect(win, color.black, (self.pos[0]-37, (self.pos[1]-5)+cameraShift, 75, 10))
+        pygame.draw.rect(win, color.black, (self.x - 37, (self.y-5)+cameraShift, 75, 10))
 
 class Ball:
     def __init__(self):
@@ -71,6 +73,8 @@ def main():
     ball = Ball()
     clock = pygame.time.Clock()
     cameraShift = 0
+    ball.dx = 0
+    platforms.append(Platform())
     while run:
         win.fill(color.grey)
         clock.tick(60)
@@ -92,19 +96,26 @@ def main():
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-                    moveLeft = True
+                    ball.dx = -10
                 if event.key == pygame.K_d:
-                    moveRight = True
+                    ball.dx = 10
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
-                    moveLeft = False
+                    ball.dx = 0
                 if event.key == pygame.K_d:
-                    moveRight = False
+                    ball.dx = 0
 
-        if moveLeft:
-            ball.moveX(-10)
-        if moveRight:
-            ball.moveX(10)
+        
+        if ball.x < 0:
+            ball.setX(500)
+        if ball.x > 500:
+            ball.setX(0)    
+
+        ball.setX(ball.x + ball.dx)
+
+        for plat in platforms:
+            plat.setY(plat.y + 10)
+            plat.drawPlatform(cameraShift)
 
         ball.drawBall(cameraShift)
         pygame.display.update()
