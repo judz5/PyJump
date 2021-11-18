@@ -1,6 +1,6 @@
 import pygame
 import math
-from random import randrange
+import random
 
 pygame.init()
 win = pygame.display.set_mode([500,700])
@@ -20,9 +20,9 @@ class color():
     white = (255,255,255)
 
 class Platform:
-    def __init__(self):
-        self.x = randrange(501)
-        self.y = 0
+    def __init__(self, y):
+        self.x = random.randint(0,500)
+        self.y = y
 
     def setY(self, y):
         self.y = y
@@ -62,6 +62,20 @@ class Ball:
     def getRect(self):
         return self.ball_rect
 
+def newPlatforms():
+    # gap between them
+    gap_lower, gap_upper= 24, 48
+    
+    # Deletin platforms outside screen
+    for p in platforms:
+        if p.y > win.get_height():
+            del p
+
+    while platforms[-1].y >= 0:
+        gap = random.randint(gap_lower, gap_upper)
+        plat = Platform(platforms[-1].y - gap)
+
+
 def reset():
     global platforms
     platforms.clear()
@@ -74,7 +88,7 @@ def main():
     clock = pygame.time.Clock()
     cameraShift = 0
     ball.dx = 0
-    platforms.append(Platform())
+    platforms.append(Platform(500))
     while run:
         win.fill(color.grey)
         clock.tick(60)
@@ -83,13 +97,10 @@ def main():
         ball.setY(ball.y + ball.dy)
 
         if ball.y > 680:
-            ball.dy *= -1
+            ball.dy *= -1.1
 
         if ball.y < 350:
             cameraShift = -ball.y + win.get_height()/2 - 20
-
-        moveLeft = False
-        moveRight = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -104,8 +115,7 @@ def main():
                     ball.dx = 0
                 if event.key == pygame.K_d:
                     ball.dx = 0
-
-        
+   
         if ball.x < 0:
             ball.setX(500)
         if ball.x > 500:
@@ -114,11 +124,11 @@ def main():
         ball.setX(ball.x + ball.dx)
 
         for plat in platforms:
-            plat.setY(plat.y + 10)
             plat.drawPlatform(cameraShift)
 
         ball.drawBall(cameraShift)
         pygame.display.update()
+        newPlatforms()
  
     pygame.quit()
 
