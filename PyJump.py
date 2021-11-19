@@ -58,11 +58,15 @@ class Ball:
         return self.pos
 
     def drawBall(self,cameraShift):
-        self.rect = pygame.Rect(self.x-20, self.y+cameraShift-20, 40,40)
+        self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
+        pygame.draw.rect(win, color.navy, self.rect)
         pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
 
     def getRect(self):
         return self.rect
+
+    def jump(self):
+        self.dy = -10
 
 def newPlatforms(cameraShift):
     # gap between them
@@ -81,11 +85,6 @@ def newPlatforms(cameraShift):
         gap = random.randint(gap_lower, gap_upper)
         plat = Platform(platforms[-1].y - gap)
         platforms.append(plat)
-
-def checkCollision(ball, plat):
-    rect = ball.getRect()
-    if rect.colliderect(plat):
-        ball.dy *= -1
 
 def reset():
     global platforms
@@ -118,7 +117,6 @@ def main():
                 cameraShift = temp
             else:
                 pass
-            print("We be shifting : %d" % cameraShift)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -146,8 +144,16 @@ def main():
 
         for plat in platforms:
             plat.drawPlatform(cameraShift)
-            if ball.rect.colliderect(plat.rect):
-                ball.dy *= -1
+
+        for plat in platforms:    
+            if ball.rect.colliderect(plat) and ball.dy>0 and ball.y <= plat.y-15 and not ball.y > plat.y:
+                ball.jump()
+            
+            
+            #if ball.y == plat.y+cameraShift and ball.x <= (plat.x + 37) and ball.x >= (plat.x - 37) and ball.dy > 0:
+             #   ball.dy *= -1.5
+
+            #if ball.dy > 0 and 
 
         ball.drawBall(cameraShift)
         pygame.display.update()
