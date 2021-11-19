@@ -13,16 +13,17 @@ prePoint = None
 #colors
 class color():
 
-    black = (0,0,0) # normal string
-    navy = (20,33,61) # maybe some kind of special string
+    black = (0,0,0) # normal platform
+    navy = (20,33,61) # maybe spring or moving platform
     orange = (252, 163, 17) # ball
     grey = (229, 229, 229) # background 
-    white = (255,255,255)
+    white = (255,255,255) # background
 
 class Platform:
     def __init__(self, y):
         self.x = random.randint(0,500)
         self.y = y
+        self.rect = None
 
     def setY(self, y):
         self.y = y
@@ -31,7 +32,8 @@ class Platform:
         return self.pos
 
     def drawPlatform(self, cameraShift):
-        pygame.draw.rect(win, color.black, (self.x - 37, (self.y-5)+cameraShift, 75, 10))
+        self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
+        pygame.draw.rect(win, color.black, self.rect)
 
 class Ball:
     def __init__(self):
@@ -41,7 +43,7 @@ class Ball:
         self.dx = 0
         self.dy = 0
         self.gravity = 0.3
-        self.ball_rect = pygame.Rect(self.x,self.y,40,40)
+        self.rect = pygame.Rect(self.x,self.y,40,40)
 
     def setY(self, y):
         self.y = y
@@ -56,22 +58,20 @@ class Ball:
         return self.pos
 
     def drawBall(self,cameraShift):
-        self.ball_rect = pygame.Rect(self.x-20, self.y+cameraShift-20, 40,40)
+        self.rect = pygame.Rect(self.x-20, self.y+cameraShift-20, 40,40)
         pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
 
     def getRect(self):
-        return self.ball_rect
+        return self.rect
 
 def newPlatforms(cameraShift):
     # gap between them
     gap_lower, gap_upper= 24, 48
 
-    print("In new platform gen")
-
     # deleting platforms outside of screen 
     i = 0
     while(i < len(platforms)):
-        if platforms[i].y > win.get_height():
+        if platforms[i].y+cameraShift > win.get_height():
             del platforms[i]
         i+=1
     i = 0        
@@ -82,6 +82,10 @@ def newPlatforms(cameraShift):
         plat = Platform(platforms[-1].y - gap)
         platforms.append(plat)
 
+def checkCollision(ball, plat):
+    rect = ball.getRect()
+    if rect.colliderect(plat):
+        ball.dy *= -1
 
 def reset():
     global platforms
@@ -98,15 +102,23 @@ def main():
     platforms.append(Platform(500))
     while run:
         win.fill(color.grey)
-        dt = clock.tick(60)
+        
+        clock.tick(60)
+
         ball.dy += ball.gravity
         ball.setY(ball.y + ball.dy)
-
-        if ball.y > 680:
+        
+        if ball.y > 680-cameraShift:
             ball.dy *= -1.1 
-
-        if ball.y < 350:
-            cameraShift = -ball.y + win.get_height()/2 - 20
+        
+        # Getting the Camera Shift 
+        if ball.y < win.get_height() // 2 - 40:
+            temp = -ball.y + win.get_height()/2 - 20
+            if temp>cameraShift:
+                cameraShift = temp
+            else:
+                pass
+            print("We be shifting : %d" % cameraShift)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -122,6 +134,7 @@ def main():
                 if event.key == pygame.K_d:
                     ball.dx = 0
    
+        # making ball go from right to left if you go past bounds
         if ball.x < 0:
             ball.setX(500)
         if ball.x > 500:
@@ -133,10 +146,11 @@ def main():
 
         for plat in platforms:
             plat.drawPlatform(cameraShift)
+            if ball.rect.colliderect(plat.rect):
+                ball.dy *= -1
 
         ball.drawBall(cameraShift)
         pygame.display.update()
-        #newPlatforms()
 
     pygame.quit()
 
