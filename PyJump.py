@@ -35,7 +35,7 @@ class Platform:
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
         pygame.draw.rect(win, color.black, self.rect)
 
-class Ball:
+class Player:
     def __init__(self):
         self.x = 250
         self.y = 350
@@ -57,10 +57,10 @@ class Ball:
     def get_pos(self):
         return self.pos
 
-    def drawBall(self,cameraShift):
-        self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
+    def drawPlayer(self,cameraShift):
+        #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
+        self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
         pygame.draw.rect(win, color.navy, self.rect)
-        pygame.draw.circle(win, color.orange, (self.x, self.y+cameraShift), 20)
 
     def getRect(self):
         return self.rect
@@ -70,7 +70,7 @@ class Ball:
 
 def newPlatforms(cameraShift):
     # gap between them
-    gap_lower, gap_upper= 24, 48
+    gap_lower, gap_upper= 48, 68
 
     # deleting platforms outside of screen 
     i = 0
@@ -94,68 +94,64 @@ def reset():
 def main():
     global platforms
     run = True
-    ball = Ball()
+    player = Player()
     clock = pygame.time.Clock()
     cameraShift = 0
-    ball.dx = 0
+    player.dx = 0
     platforms.append(Platform(500))
+    player.jump()
     while run:
         win.fill(color.grey)
-        
+        newPlatforms(cameraShift)
         clock.tick(60)
 
-        ball.dy += ball.gravity
-        ball.setY(ball.y + ball.dy)
+        player.dy += player.gravity
+        player.setY(player.y + player.dy)
         
-        if ball.y > 680-cameraShift:
-            ball.dy *= -1.1 
+        if player.y > 680-cameraShift:
+            run = False
         
         # Getting the Camera Shift 
-        if ball.y < win.get_height() // 2 - 40:
-            temp = -ball.y + win.get_height()/2 - 20
+        if player.y < win.get_height() // 2 - 40:
+            temp = -player.y + win.get_height()/2 - 20
             if temp>cameraShift:
                 cameraShift = temp
             else:
                 pass
+
+        for plat in platforms:
+            plat.drawPlatform(cameraShift)
+
+        # Check if player hits platform
+        for plat in platforms:
+            if plat.y+cameraShift > player.y:
+                if player.rect.colliderect(plat.rect) and player.dy>0 and player.y+40 <= plat.y+cameraShift:
+                    player.jump()    
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-                    ball.dx = -10 
+                    player.dx = -10 
                 if event.key == pygame.K_d:
-                    ball.dx = 10
+                    player.dx = 10
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
-                    ball.dx = 0 
+                    player.dx = 0 
                 if event.key == pygame.K_d:
-                    ball.dx = 0
-   
+                    player.dx = 0
+        
+        if not player.x+player.dx < 0 or player.x+player.dx > 500:
+            player.setX(player.x + player.dx)
+
         # making ball go from right to left if you go past bounds
-        if ball.x < 0:
-            ball.setX(500)
-        if ball.x > 500:
-            ball.setX(0)    
+        # if player.x <= 0:
+        #     player.setX(500)
+        # if player.x > 478:
+        #     player.setX(0)    
 
-        ball.setX(ball.x + ball.dx)
-
-        newPlatforms(cameraShift)
-
-        for plat in platforms:
-            plat.drawPlatform(cameraShift)
-
-        for plat in platforms:    
-            if ball.rect.colliderect(plat) and ball.dy>0 and ball.y <= plat.y-15 and not ball.y > plat.y:
-                ball.jump()
-            
-            
-            #if ball.y == plat.y+cameraShift and ball.x <= (plat.x + 37) and ball.x >= (plat.x - 37) and ball.dy > 0:
-             #   ball.dy *= -1.5
-
-            #if ball.dy > 0 and 
-
-        ball.drawBall(cameraShift)
+        player.drawPlayer(cameraShift)
         pygame.display.update()
 
     pygame.quit()
