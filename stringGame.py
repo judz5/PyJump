@@ -62,18 +62,25 @@ class Ball:
     def getRect(self):
         return self.ball_rect
 
-def newPlatforms():
+def newPlatforms(cameraShift):
     # gap between them
     gap_lower, gap_upper= 24, 48
-    
-    # Deletin platforms outside screen
-    for p in platforms:
-        if p.y > win.get_height():
-            del p
 
-    while platforms[-1].y >= 0:
+    print("In new platform gen")
+
+    # deleting platforms outside of screen 
+    i = 0
+    while(i < len(platforms)):
+        if platforms[i].y > win.get_height():
+            del platforms[i]
+        i+=1
+    i = 0        
+
+    # Gen only the platforms we can see [-1] returns the last in a list
+    while platforms[-1].y+cameraShift >= 0:
         gap = random.randint(gap_lower, gap_upper)
         plat = Platform(platforms[-1].y - gap)
+        platforms.append(plat)
 
 
 def reset():
@@ -91,13 +98,12 @@ def main():
     platforms.append(Platform(500))
     while run:
         win.fill(color.grey)
-        clock.tick(60)
-
+        dt = clock.tick(60)
         ball.dy += ball.gravity
         ball.setY(ball.y + ball.dy)
 
         if ball.y > 680:
-            ball.dy *= -1.1
+            ball.dy *= -1.1 
 
         if ball.y < 350:
             cameraShift = -ball.y + win.get_height()/2 - 20
@@ -107,12 +113,12 @@ def main():
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-                    ball.dx = -10
+                    ball.dx = -10 
                 if event.key == pygame.K_d:
                     ball.dx = 10
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
-                    ball.dx = 0
+                    ball.dx = 0 
                 if event.key == pygame.K_d:
                     ball.dx = 0
    
@@ -123,13 +129,15 @@ def main():
 
         ball.setX(ball.x + ball.dx)
 
+        newPlatforms(cameraShift)
+
         for plat in platforms:
             plat.drawPlatform(cameraShift)
 
         ball.drawBall(cameraShift)
         pygame.display.update()
-        newPlatforms()
- 
+        #newPlatforms()
+
     pygame.quit()
 
 
