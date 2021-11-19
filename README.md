@@ -1,12 +1,10 @@
-# StringGame
-Bounce A ball up by drawing strings
+# PyJump
+My project has changed from its first idea of drawing strings to a game similar to doodle Jump
 
-This is basically a copy of Lynez by dafluffypotato just seems like a cool game idea that introduces some cool physics ive never worked with before.
+I changed the project idea because I knew the physics and collision of the lines was going to be too much trouble
+and I feel that making this game which is a simplier concept but making it look good is a better path for me to take
 
-### As of now my biggest concerns are
-- Collision with lines 
-- figure out the gravity after i hit a line
-- calculating the angle to launch ball based on angle of line
+I plan for this game to be fun to play, and have custom made sprites, particles, and other effects to make the game stand out
 
-### Lynez's Source is the project I am using for inspiration
-The code is only in here so i can access it on my school computer <3
+
+
