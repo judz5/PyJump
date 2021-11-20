@@ -21,7 +21,7 @@ class color():
 
 class Platform:
     def __init__(self, y):
-        self.x = random.randint(0,500)
+        self.x = random.randint(40,460)
         self.y = y
         self.rect = None
 
@@ -125,7 +125,9 @@ def main():
         # Check if player hits platform
         for plat in platforms:
             if plat.y+cameraShift > player.y:
-                if player.rect.colliderect(plat.rect) and player.dy>0 and player.y+40 <= plat.y+cameraShift:
+                if player.rect.colliderect(plat.rect) and player.dy>=0 and player.rect.bottom <= (plat.y+cameraShift+5): # +5 is the tolerance, kinda room for error
+                    print("PLAYER Y : %d" % player.rect.bottom)
+                    print("PLAT Y : %d" % (plat.y+cameraShift))
                     player.jump()    
 
         for event in pygame.event.get():
@@ -144,12 +146,6 @@ def main():
         
         if not player.x+player.dx < 0 or player.x+player.dx > 500:
             player.setX(player.x + player.dx)
-
-        # making ball go from right to left if you go past bounds
-        # if player.x <= 0:
-        #     player.setX(500)
-        # if player.x > 478:
-        #     player.setX(0)    
 
         player.drawPlayer(cameraShift)
         pygame.display.update()
