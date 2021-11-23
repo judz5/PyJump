@@ -6,6 +6,7 @@ pygame.init()
 win = pygame.display.set_mode([500,700])
 
 platforms = []
+particles = []
 
 cameraShift = 0
 prePoint = None
@@ -16,9 +17,15 @@ class color():
     black = (0,0,0) # normal platform
     navy = (20,33,61) # maybe spring or moving platform
     orange = (252, 163, 17) # ball
-    grey = (229, 229, 229) # background 
+    grey = (242, 132, 130) # background 
     white = (255,255,255) # background
 
+class Particle():
+    def __init__(self, pos, vel, timer):
+        self.pos = pos
+        self.vel = vel
+        self.timer = timer
+        
 class Platform:
     def __init__(self, y):
         self.x = random.randint(40,460)
@@ -33,7 +40,7 @@ class Platform:
 
     def drawPlatform(self, cameraShift):
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
-        pygame.draw.rect(win, color.black, self.rect)
+        pygame.draw.rect(win, color.grey, self.rect)
 
 class Player:
     def __init__(self):
@@ -60,7 +67,7 @@ class Player:
     def drawPlayer(self,cameraShift):
         #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
         self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
-        pygame.draw.rect(win, color.navy, self.rect)
+        pygame.draw.rect(win, color.orange, self.rect)
 
     def getRect(self):
         return self.rect
@@ -101,7 +108,7 @@ def main():
     platforms.append(Platform(500))
     player.jump()
     while run:
-        win.fill(color.grey)
+        win.fill(color.navy)
         newPlatforms(cameraShift)
         clock.tick(60)
 
@@ -128,7 +135,19 @@ def main():
                 if player.rect.colliderect(plat.rect) and player.dy>=0 and player.rect.bottom <= (plat.y+cameraShift+5): # +5 is the tolerance, kinda room for error
                     print("PLAYER Y : %d" % player.rect.bottom)
                     print("PLAT Y : %d" % (plat.y+cameraShift))
+                    for i in range(25):
+                        particles.append(Particle([player.rect.centerx, plat.y], [random.randint(0, 20) / 10 - 1, -1], random.randint(4, 6)))
                     player.jump()    
+
+        for particle in particles:
+            particle.pos[0] += particle.vel[0]
+            particle.pos[1] += particle.vel[1]
+            particle.timer -= 0.05
+            particle.vel[1] += 0.1
+
+            pygame.draw.circle(win, color.white, [int(particle.pos[0]), int(particle.pos[1])+cameraShift], int(particle.timer))
+            if particle.timer <= 0:
+                particles.remove(particle)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
