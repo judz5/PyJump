@@ -17,8 +17,10 @@ class color():
     black = (0,0,0) # normal platform
     navy = (20,33,61) # maybe spring or moving platform
     orange = (252, 163, 17) # ball
-    grey = (242, 132, 130) # background 
+    pink = (255, 0, 160) # background 
     white = (255,255,255) # background
+    blue = (0,186,255)
+
 
 class Particle():
     def __init__(self, pos, vel, timer):
@@ -40,7 +42,7 @@ class Platform:
 
     def drawPlatform(self, cameraShift):
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
-        pygame.draw.rect(win, color.grey, self.rect)
+        pygame.draw.rect(win, color.blue, self.rect)
 
 class Player:
     def __init__(self):
@@ -50,35 +52,36 @@ class Player:
         self.dx = 0
         self.dy = 0
         self.gravity = 0.3
+        self.score = 0
         self.rect = pygame.Rect(self.x,self.y,40,40)
+    
+    def drawPlayer(self,cameraShift):
+        #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
+        self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
+        pygame.draw.rect(win, color.pink  , self.rect)
 
     def setY(self, y):
         self.y = y
 
     def setX(self, x):
         self.x = x
-
-    def moveX(self, x):
-        self.x += x
-
-    def get_pos(self):
-        return self.pos
-
-    def drawPlayer(self,cameraShift):
-        #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
-        self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
-        pygame.draw.rect(win, color.orange, self.rect)
-
-    def getRect(self):
-        return self.rect
-
+ 
     def jump(self):
         self.dy = -10
 
-def newPlatforms(cameraShift):
-    # gap between them
-    gap_lower, gap_upper= 48, 68
+    def highJump(self):
+        self.dy = -20
 
+def newPlatforms(cameraShift, score):
+    # gap between them
+    if score <= 10:
+        gap_lower, gap_upper= 48, 68
+    elif score <= 25:
+        gap_lower, gap_upper = 68, 88
+    elif score <= 50:
+        gap_lower, gap_upper = 88, 108
+    else:
+        gap_lower, gap_upper = 108, 125 
     # deleting platforms outside of screen 
     i = 0
     while(i < len(platforms)):
@@ -108,13 +111,15 @@ def main():
     platforms.append(Platform(500))
     player.jump()
     while run:
-        win.fill(color.navy)
-        newPlatforms(cameraShift)
+        win.fill(color.black)
+        score = int(cameraShift/200)
+        newPlatforms(cameraShift, score)
         clock.tick(60)
 
         player.dy += player.gravity
         player.setY(player.y + player.dy)
         
+        # Check if hits bottom relative to camera shift
         if player.y > 680-cameraShift:
             run = False
         
@@ -126,6 +131,7 @@ def main():
             else:
                 pass
 
+        # Drawing platforms from list
         for plat in platforms:
             plat.drawPlatform(cameraShift)
 
@@ -133,12 +139,14 @@ def main():
         for plat in platforms:
             if plat.y+cameraShift > player.y:
                 if player.rect.colliderect(plat.rect) and player.dy>=0 and player.rect.bottom <= (plat.y+cameraShift+5): # +5 is the tolerance, kinda room for error
-                    print("PLAYER Y : %d" % player.rect.bottom)
-                    print("PLAT Y : %d" % (plat.y+cameraShift))
-                    for i in range(25):
-                        particles.append(Particle([player.rect.centerx, plat.y], [random.randint(0, 20) / 10 - 1, -1], random.randint(4, 6)))
+                    for i in range(5):
+                        particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6)))
                     player.jump()    
 
+        # Possible way of doing the score
+        print("Score = %d" % score)
+
+        # Drawing Particles 
         for particle in particles:
             particle.pos[0] += particle.vel[0]
             particle.pos[1] += particle.vel[1]
@@ -146,6 +154,7 @@ def main():
             particle.vel[1] += 0.1
 
             pygame.draw.circle(win, color.white, [int(particle.pos[0]), int(particle.pos[1])+cameraShift], int(particle.timer))
+            # Removing old particles 
             if particle.timer <= 0:
                 particles.remove(particle)
 
@@ -162,7 +171,8 @@ def main():
                     player.dx = 0 
                 if event.key == pygame.K_d:
                     player.dx = 0
-        
+
+        # Stay in bounds  
         if not player.x+player.dx < 0 or player.x+player.dx > 500:
             player.setX(player.x + player.dx)
 
