@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+import time
 
 pygame.init()
 win = pygame.display.set_mode([500,700])
@@ -20,21 +21,26 @@ class color():
     pink = (255, 0, 160) # background 
     white = (255,255,255) # background
     blue = (0,186,255)
-
+    red = (255,0,0)
 
 class Particle():
-    def __init__(self, pos, vel, timer):
+    def __init__(self, pos, vel, timer, color):
         self.pos = pos
         self.vel = vel
         self.timer = timer
+        self.color = color
         
 class Platform:
     def __init__(self, y):
         self.x = random.randint(40,460)
         self.y = y
         self.rect = None
+        self.color = color.blue
         if(random.randint(0, 10) == 5):
             self.type = 1
+        elif(random.randint(0,10) == 5):
+            self.type = 2
+            self.color = color.red
         else:
             self.type = 0
         
@@ -48,8 +54,9 @@ class Platform:
     def drawPlatform(self, cameraShift):
         if(self.type == 1):
             pygame.draw.rect(win, color.orange, (self.x-18, self.y-15+cameraShift, 37, 10))
+        
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
-        pygame.draw.rect(win, color.blue, self.rect)
+        pygame.draw.rect(win, self.color, self.rect)
 
 class Player:
     def __init__(self):
@@ -150,12 +157,19 @@ def main():
                     if(plat.type == 0):
                         player.jump()
                         for i in range(5):
-                            particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6)))
+                            particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6),color.white))
                     elif(plat.type == 1):
                         player.highJump()
                         for i in range(25):
-                            particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6)))    
-                          
+                            particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6),color.white))    
+                    elif(plat.type == 2):
+                        player.jump()
+                        for i in range(5):
+                            particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6),color.white))
+                        for i in range(50):
+                            particles.append(Particle([plat.x, plat.y+20], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(3, 8),color.red))
+                        plat.y = 1000
+
         # Possible way of doing the score
         output = "Score = %d" % score
         textSurface = myfont.render(output, False, color.white)
@@ -168,7 +182,7 @@ def main():
             particle.timer -= 0.05
             particle.vel[1] += 0.1
 
-            pygame.draw.circle(win, color.white, [int(particle.pos[0]), int(particle.pos[1])+cameraShift], int(particle.timer))
+            pygame.draw.circle(win, particle.color, [int(particle.pos[0]), int(particle.pos[1])+cameraShift], int(particle.timer))
             # Removing old particles 
             if particle.timer <= 0:
                 particles.remove(particle)
@@ -188,7 +202,7 @@ def main():
                     player.dx = 0
 
         # Stay in bounds  
-        if not player.x+player.dx < 0 or player.x+player.dx > 500:
+        if not player.x+player.dx < 0 and not player.x+player.dx > 450:
             player.setX(player.x + player.dx)
 
         player.drawPlayer(cameraShift)
