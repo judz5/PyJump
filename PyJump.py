@@ -33,6 +33,11 @@ class Platform:
         self.x = random.randint(40,460)
         self.y = y
         self.rect = None
+        if(random.randint(0, 10) == 5):
+            self.type = 1
+        else:
+            self.type = 0
+        
 
     def setY(self, y):
         self.y = y
@@ -41,6 +46,8 @@ class Platform:
         return self.pos
 
     def drawPlatform(self, cameraShift):
+        if(self.type == 1):
+            pygame.draw.rect(win, color.orange, (self.x-18, self.y-15+cameraShift, 37, 10))
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
         pygame.draw.rect(win, color.blue, self.rect)
 
@@ -110,6 +117,7 @@ def main():
     player.dx = 0
     platforms.append(Platform(500))
     player.jump()
+    myfont = pygame.font.SysFont('Comic Sans MS', 30)
     while run:
         win.fill(color.black)
         score = int(cameraShift/200)
@@ -139,12 +147,19 @@ def main():
         for plat in platforms:
             if plat.y+cameraShift > player.y:
                 if player.rect.colliderect(plat.rect) and player.dy>=0 and player.rect.bottom <= (plat.y+cameraShift+5): # +5 is the tolerance, kinda room for error
-                    for i in range(5):
-                        particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6)))
-                    player.jump()    
-
+                    if(plat.type == 0):
+                        player.jump()
+                        for i in range(5):
+                            particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6)))
+                    elif(plat.type == 1):
+                        player.highJump()
+                        for i in range(25):
+                            particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6)))    
+                          
         # Possible way of doing the score
-        print("Score = %d" % score)
+        output = "Score = %d" % score
+        textSurface = myfont.render(output, False, color.white)
+        win.blit(textSurface,(0,0))
 
         # Drawing Particles 
         for particle in particles:
