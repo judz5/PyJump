@@ -81,7 +81,7 @@ class Player:
     def drawPlayer(self,cameraShift):
         #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
         self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
-        pygame.draw.rect(win, color.pink  , self.rect)
+        #pygame.draw.rect(win, color.pink  , self.rect)
 
     def setY(self, y):
         self.y = y
@@ -136,10 +136,15 @@ def main():
 
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
-    bg = pygame.image.load("Art/back.png")
-    bg = pygame.transform.scale(bg, (500,700))
+    ch0 = pygame.image.load("Art/f0.png")
+    ch0 = pygame.transform.scale(ch0, (64,64))
+    ch0_1 = pygame.transform.flip(ch0, True, False)
+    #bg = pygame.image.load("Art/back.png")
+    #bg = pygame.transform.scale(bg, (500,700))
+    #back_y = 0
+    curr = ch0
     while run:
-        win.blit(bg, (0,0))
+        win.fill(color.black)
         score = int(cameraShift/200)
         newPlatforms(cameraShift, score)
         clock.tick(60)
@@ -150,7 +155,7 @@ def main():
         # Check if hits bottom relative to camera shift
         if player.y > 680-cameraShift:
             run = False
-        
+
         # Getting the Camera Shift 
         if player.y < win.get_height() // 2 - 40:
             temp = -player.y + win.get_height()/2 - 20
@@ -212,9 +217,11 @@ def main():
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-                    player.dx = -10 
+                    player.dx = -10
+                    curr = ch0_1
                 if event.key == pygame.K_d:
                     player.dx = 10
+                    curr = ch0
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     player.dx = 0 
@@ -226,6 +233,7 @@ def main():
             player.setX(player.x + player.dx)
 
         player.drawPlayer(cameraShift)
+        win.blit(curr, (player.x-10, player.y+cameraShift-20))
         pygame.display.update()
 
     pygame.quit()
