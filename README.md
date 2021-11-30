@@ -6,5 +6,7 @@ and I feel that making this game which is a simplier concept but making it look 
 
 I plan for this game to be fun to play, and have custom made sprites, particles, and other effects to make the game stand out
 
+ - Side note, I know this code is really bad and doesnt use pygames sprites correctly, if at all. As of now all that im worried about is it working, I'm more so just using this as a base to prove I can make something with pygame. My next pygame project will have much better code.
+
 
 
