@@ -22,6 +22,7 @@ class color():
     white = (255,255,255) # background
     blue = (0,186,255)
     red = (255,0,0)
+    green = (0,255,0)
 
 class Particle():
     def __init__(self, pos, vel, timer, color):
@@ -33,20 +34,28 @@ class Particle():
 class Platform:
     def __init__(self, y):
         self.x = random.randint(40,460)
+        self.dx = 0
         self.y = y
         self.rect = None
         self.color = color.blue
-        if(random.randint(0, 10) == 5):
+        x = random.randint(0,20)
+        if(x <= 1):
             self.type = 1
-        elif(random.randint(0,10) == 5):
+        elif(x == 10):
             self.type = 2
             self.color = color.red
+        elif(x == 15):
+            self.type = 3
+            self.dx = 5
+            self.color = color.green
         else:
             self.type = 0
         
-
     def setY(self, y):
         self.y = y
+
+    def setX(self, x):
+        self.x = x
 
     def getPos(self):
         return self.pos
@@ -124,9 +133,13 @@ def main():
     player.dx = 0
     platforms.append(Platform(500))
     player.jump()
+
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
+
+    bg = pygame.image.load("Art/back.png")
+    bg = pygame.transform.scale(bg, (500,700))
     while run:
-        win.fill(color.black)
+        win.blit(bg, (0,0))
         score = int(cameraShift/200)
         newPlatforms(cameraShift, score)
         clock.tick(60)
@@ -149,12 +162,19 @@ def main():
         # Drawing platforms from list
         for plat in platforms:
             plat.drawPlatform(cameraShift)
+            if plat.type == 3:
+                if plat.x+plat.dx >= 465:
+                    plat.dx = -5
+                elif plat.x+plat.dx <= 35:
+                    plat.dx = 5
+                plat.setX(plat.x + plat.dx)
+            
 
         # Check if player hits platform
         for plat in platforms:
             if plat.y+cameraShift > player.y:
                 if player.rect.colliderect(plat.rect) and player.dy>=0 and player.rect.bottom <= (plat.y+cameraShift+5): # +5 is the tolerance, kinda room for error
-                    if(plat.type == 0):
+                    if(plat.type == 0 or plat.type == 3):
                         player.jump()
                         for i in range(5):
                             particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6),color.white))
@@ -167,7 +187,7 @@ def main():
                         for i in range(5):
                             particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6),color.white))
                         for i in range(50):
-                            particles.append(Particle([plat.x, plat.y+20], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(3, 8),color.red))
+                            particles.append(Particle([plat.x, plat.y+20], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.red))
                         plat.y = 1000
 
         # Possible way of doing the score
