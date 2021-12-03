@@ -67,17 +67,58 @@ class Platform:
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
         pygame.draw.rect(win, self.color, self.rect)
 
-class Player:
+class Player(pygame.sprite.Sprite):
     def __init__(self):
+        super().__init__()
+        
         self.x = 250
         self.y = 350
         self.pos = (self.x, self.y)
         self.dx = 0
         self.dy = 0
+        
         self.gravity = 0.3
+        
         self.score = 0
-        self.rect = pygame.Rect(self.x,self.y,40,40)
-    
+        
+        self.jump_sprites = []
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f1.png"))
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f2.png"))
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f3.png"))
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f4.png"))
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f5.png"))
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f6.png"))
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f7.png"))
+        self.jump_sprites.append(pygame.image.load("Art/Jump/f8.png"))
+        
+        self.stand_sprites = []
+        self.stand_sprites.append(pygame.image.load("Art/f0.png"))
+        self.stand_sprites.append(pygame.transform.scale(pygame.image.load("Art/f0.png")))
+
+        self.highJump_sprites = []
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f1.png"))
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f2.png"))
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f3.png"))
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f4.png"))
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f5.png"))
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f6.png"))
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f7.png"))
+        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f8.png"))
+
+        self.death_sprites = []
+        self.death_sprites.append(pygame.image.load("Art/Death/f1.png"))
+        self.death_sprites.append(pygame.image.load("Art/Death/f2.png"))
+        self.death_sprites.append(pygame.image.load("Art/Death/f3.png"))
+        self.death_sprites.append(pygame.image.load("Art/Death/f4.png"))
+        self.death_sprites.append(pygame.image.load("Art/Death/f5.png"))
+        self.death_sprites.append(pygame.image.load("Art/Death/f6.png"))
+        self.death_sprites.append(pygame.image.load("Art/Death/f7.png"))
+        self.death_sprites.append(pygame.image.load("Art/Death/f8.png"))
+
+        self.current_sprite = self.stand_sprites[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [x, y]
+
     def drawPlayer(self,cameraShift):
         #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
         self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
@@ -136,13 +177,8 @@ def main():
 
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
-    ch0 = pygame.image.load("Art/f0.png")
-    ch0 = pygame.transform.scale(ch0, (64,64))
-    ch0_1 = pygame.transform.flip(ch0, True, False)
-    #bg = pygame.image.load("Art/back.png")
-    #bg = pygame.transform.scale(bg, (500,700))
-    #back_y = 0
-    curr = ch0
+    moving_sprites = pygame.sprite.Group()
+    moving_sprites.add(player)
     while run:
         win.fill(color.black)
         score = int(cameraShift/200)
@@ -198,7 +234,6 @@ def main():
         # Possible way of doing the score
         output = "Score = %d" % score
         textSurface = myfont.render(output, False, color.white)
-        win.blit(textSurface,(0,0))
 
         # Drawing Particles 
         for particle in particles:
@@ -233,7 +268,6 @@ def main():
             player.setX(player.x + player.dx)
 
         player.drawPlayer(cameraShift)
-        win.blit(curr, (player.x-10, player.y+cameraShift-20))
         pygame.display.update()
 
     pygame.quit()
