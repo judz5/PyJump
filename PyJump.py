@@ -8,6 +8,7 @@ win = pygame.display.set_mode([500,700])
 
 platforms = []
 particles = []
+lasers = []
 
 cameraShift = 0
 prePoint = None
@@ -23,6 +24,9 @@ class color():
     blue = (0,186,255)
     red = (255,0,0)
     green = (0,255,0)
+
+    l1 = (128,0,0)
+    l2 = (255,65,65)
 
 class Particle():
     def __init__(self, pos, vel, timer, color):
@@ -67,62 +71,21 @@ class Platform:
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
         pygame.draw.rect(win, self.color, self.rect)
 
-class Player(pygame.sprite.Sprite):
+class Player:
     def __init__(self):
-        super().__init__()
-        
         self.x = 250
         self.y = 350
         self.pos = (self.x, self.y)
         self.dx = 0
         self.dy = 0
-        
         self.gravity = 0.3
-        
         self.score = 0
-        
-        self.jump_sprites = []
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f1.png"))
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f2.png"))
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f3.png"))
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f4.png"))
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f5.png"))
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f6.png"))
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f7.png"))
-        self.jump_sprites.append(pygame.image.load("Art/Jump/f8.png"))
-        
-        self.stand_sprites = []
-        self.stand_sprites.append(pygame.image.load("Art/f0.png"))
-        self.stand_sprites.append(pygame.transform.scale(pygame.image.load("Art/f0.png")))
-
-        self.highJump_sprites = []
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f1.png"))
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f2.png"))
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f3.png"))
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f4.png"))
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f5.png"))
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f6.png"))
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f7.png"))
-        self.highJump_sprites.append(pygame.image.load("Art/HighJump/f8.png"))
-
-        self.death_sprites = []
-        self.death_sprites.append(pygame.image.load("Art/Death/f1.png"))
-        self.death_sprites.append(pygame.image.load("Art/Death/f2.png"))
-        self.death_sprites.append(pygame.image.load("Art/Death/f3.png"))
-        self.death_sprites.append(pygame.image.load("Art/Death/f4.png"))
-        self.death_sprites.append(pygame.image.load("Art/Death/f5.png"))
-        self.death_sprites.append(pygame.image.load("Art/Death/f6.png"))
-        self.death_sprites.append(pygame.image.load("Art/Death/f7.png"))
-        self.death_sprites.append(pygame.image.load("Art/Death/f8.png"))
-
-        self.current_sprite = self.stand_sprites[0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = [x, y]
-
+        self.rect = pygame.Rect(self.x,self.y,40,40)
+    
     def drawPlayer(self,cameraShift):
         #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
         self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
-        #pygame.draw.rect(win, color.pink  , self.rect)
+        pygame.draw.rect(win, color.pink  , self.rect)
 
     def setY(self, y):
         self.y = y
@@ -135,6 +98,17 @@ class Player(pygame.sprite.Sprite):
 
     def highJump(self):
         self.dy = -20
+
+class Laser:
+    def __init__(self):
+        self.x = random.randint(50, 450)
+        self.x0 = self.x - 50
+        self.x1 = self.x + 50
+
+    def drawLaser(self):
+        pygame.draw.line(win, color.l2, (self.x, 0), (self.x, 700))
+        pygame.draw.line(win, color.l1, (self.x0, 0), (self.x0, 700))
+        pygame.draw.line(win, color.l1, (self.x1, 0), (self.x1, 700))
 
 def newPlatforms(cameraShift, score):
     # gap between them
@@ -177,8 +151,7 @@ def main():
 
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
-    moving_sprites = pygame.sprite.Group()
-    moving_sprites.add(player)
+    lasers.append(Laser())
     while run:
         win.fill(color.black)
         score = int(cameraShift/200)
@@ -191,7 +164,7 @@ def main():
         # Check if hits bottom relative to camera shift
         if player.y > 680-cameraShift:
             run = False
-
+        
         # Getting the Camera Shift 
         if player.y < win.get_height() // 2 - 40:
             temp = -player.y + win.get_height()/2 - 20
@@ -210,6 +183,8 @@ def main():
                     plat.dx = 5
                 plat.setX(plat.x + plat.dx)
             
+        for laser in lasers:
+            laser.drawLaser()
 
         # Check if player hits platform
         for plat in platforms:
@@ -234,6 +209,7 @@ def main():
         # Possible way of doing the score
         output = "Score = %d" % score
         textSurface = myfont.render(output, False, color.white)
+        win.blit(textSurface,(0,0))
 
         # Drawing Particles 
         for particle in particles:
@@ -252,11 +228,9 @@ def main():
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-                    player.dx = -10
-                    curr = ch0_1
+                    player.dx = -10 
                 if event.key == pygame.K_d:
                     player.dx = 10
-                    curr = ch0
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     player.dx = 0 
