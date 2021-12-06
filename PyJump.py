@@ -8,7 +8,10 @@ win = pygame.display.set_mode([500,700])
 
 platforms = []
 particles = []
+
 lasers = []
+maxLasers = 1
+
 
 cameraShift = 0
 prePoint = None
@@ -102,13 +105,43 @@ class Player:
 class Laser:
     def __init__(self):
         self.x = random.randint(50, 450)
-        self.x0 = self.x - 50
-        self.x1 = self.x + 50
+        
+        self.drawAll = True
 
-    def drawLaser(self):
+        self.x0 = self.x - 100
+        self.x1 = self.x + 100
+
+    def shift(self):
+        if(self.x0 != self.x and self.x1 != self.x):
+            self.x0 += 1
+            self.x1 -= 1
+        else:
+            self.drawAll = False
+
+    def drawLaser(self, player):
         pygame.draw.line(win, color.l2, (self.x, 0), (self.x, 700))
-        pygame.draw.line(win, color.l1, (self.x0, 0), (self.x0, 700))
-        pygame.draw.line(win, color.l1, (self.x1, 0), (self.x1, 700))
+        if self.drawAll:
+            pygame.draw.line(win, color.l1, (self.x0, 0), (self.x0, 700))
+            pygame.draw.line(win, color.l1, (self.x1, 0), (self.x1, 700))
+        else:
+            self.checkDeath(player)
+            self.effect()
+            
+
+    def checkDeath(self, player):
+        print("Checking if you died")
+        if(player.rect.centerx > self.x - 25 and player.rect.centerx < self.x + 25):
+            print("uh you shouldve died")
+            # player.kill or something
+
+    def remove(self):
+        lasers.clear()
+
+    def effect(self):
+        global particles
+        for i in range(0, 700, 10):
+            particles.append(Particle([self.x, i], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.red))
+        self.remove()
 
 def newPlatforms(cameraShift, score):
     # gap between them
@@ -139,6 +172,11 @@ def reset():
     platforms.clear()
     win.fill((255,255,255))
 
+def newLaser(score):
+    if(score >= 5):
+        if(random.randint(0,100) == 5 and len(lasers)<maxLasers):
+            lasers.append(Laser())
+
 def main():
     global platforms
     run = True
@@ -151,13 +189,14 @@ def main():
 
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
-    lasers.append(Laser())
     while run:
         win.fill(color.black)
         score = int(cameraShift/200)
         newPlatforms(cameraShift, score)
         clock.tick(60)
-
+        
+        newLaser(score)
+        
         player.dy += player.gravity
         player.setY(player.y + player.dy)
         
@@ -184,7 +223,8 @@ def main():
                 plat.setX(plat.x + plat.dx)
             
         for laser in lasers:
-            laser.drawLaser()
+            laser.shift()
+            laser.drawLaser(player)
 
         # Check if player hits platform
         for plat in platforms:
