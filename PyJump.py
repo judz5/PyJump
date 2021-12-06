@@ -8,10 +8,10 @@ win = pygame.display.set_mode([500,700])
 
 platforms = []
 particles = []
+other_particles = []
 
 lasers = []
 maxLasers = 1
-
 
 cameraShift = 0
 prePoint = None
@@ -102,6 +102,11 @@ class Player:
     def highJump(self):
         self.dy = -20
 
+    def kill(self):
+        for i in range(50):
+            other_particles.append(Particle([self.rect.centerx, self.rect.centery], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.pink))
+
+
 class Laser:
     def __init__(self):
         self.x = random.randint(50, 450)
@@ -119,7 +124,7 @@ class Laser:
             self.drawAll = False
 
     def drawLaser(self, player):
-        pygame.draw.line(win, color.l2, (self.x, 0), (self.x, 700))
+        #pygame.draw.line(win, color.l1, (self.x, 0), (self.x, 700))
         if self.drawAll:
             pygame.draw.line(win, color.l1, (self.x0, 0), (self.x0, 700))
             pygame.draw.line(win, color.l1, (self.x1, 0), (self.x1, 700))
@@ -127,20 +132,18 @@ class Laser:
             self.checkDeath(player)
             self.effect()
             
-
     def checkDeath(self, player):
         print("Checking if you died")
         if(player.rect.centerx > self.x - 25 and player.rect.centerx < self.x + 25):
             print("uh you shouldve died")
-            # player.kill or something
+            player.kill()
 
     def remove(self):
         lasers.clear()
 
     def effect(self):
-        global particles
         for i in range(0, 700, 10):
-            particles.append(Particle([self.x, i], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.red))
+            other_particles.append(Particle([self.x, i], [random.randint(0, 20) / 10 - 1, random.uniform(-1.0,-2.0)], random.randint(2, 6),color.l1))
         self.remove()
 
 def newPlatforms(cameraShift, score):
@@ -174,7 +177,7 @@ def reset():
 
 def newLaser(score):
     if(score >= 5):
-        if(random.randint(0,100) == 5 and len(lasers)<maxLasers):
+        if(random.randint(0,200) == 100 and len(lasers)<maxLasers):
             lasers.append(Laser())
 
 def main():
@@ -192,9 +195,11 @@ def main():
     while run:
         win.fill(color.black)
         score = int(cameraShift/200)
-        newPlatforms(cameraShift, score)
         clock.tick(60)
         
+        # generating new plats
+        newPlatforms(cameraShift, score)
+        # generating a laser
         newLaser(score)
         
         player.dy += player.gravity
@@ -221,10 +226,6 @@ def main():
                 elif plat.x+plat.dx <= 35:
                     plat.dx = 5
                 plat.setX(plat.x + plat.dx)
-            
-        for laser in lasers:
-            laser.shift()
-            laser.drawLaser(player)
 
         # Check if player hits platform
         for plat in platforms:
@@ -246,10 +247,14 @@ def main():
                             particles.append(Particle([plat.x, plat.y+20], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.red))
                         plat.y = 1000
 
-        # Possible way of doing the score
+        # score
         output = "Score = %d" % score
         textSurface = myfont.render(output, False, color.white)
         win.blit(textSurface,(0,0))
+
+        for laser in lasers:
+            laser.shift()
+            laser.drawLaser(player)
 
         # Drawing Particles 
         for particle in particles:
@@ -262,6 +267,18 @@ def main():
             # Removing old particles 
             if particle.timer <= 0:
                 particles.remove(particle)
+
+        # drawing laser particles
+        for particle in other_particles:
+            particle.pos[0] += particle.vel[0]
+            particle.pos[1] += particle.vel[1]
+            particle.timer -= 0.05
+            particle.vel[1] += 0.1
+
+            pygame.draw.circle(win, particle.color, [int(particle.pos[0]), int(particle.pos[1])], int(particle.timer))
+            # Removing old particles 
+            if particle.timer <= 0:
+                other_particles.remove(particle)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
