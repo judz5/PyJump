@@ -11,7 +11,6 @@ particles = []
 other_particles = []
 
 lasers = []
-maxLasers = 1
 
 cameraShift = 0
 prePoint = None
@@ -108,7 +107,7 @@ class Player:
 
 
 class Laser:
-    def __init__(self):
+    def __init__(self, score):
         self.x = random.randint(50, 450)
         
         self.drawAll = True
@@ -116,15 +115,22 @@ class Laser:
         self.x0 = self.x - 100
         self.x1 = self.x + 100
 
+        if score<=35:
+            self.speed = 1
+        elif score<=100:
+            self.speed = 2
+        elif score<=150:
+            self.speed = 2
+
     def shift(self):
         if(self.x0 != self.x and self.x1 != self.x):
-            self.x0 += 1
-            self.x1 -= 1
+            self.x0 += self.speed
+            self.x1 -= self.speed
         else:
             self.drawAll = False
 
     def drawLaser(self, player):
-        #pygame.draw.line(win, color.l1, (self.x, 0), (self.x, 700))
+        pygame.draw.line(win, color.l1, (self.x, 0), (self.x, 700))
         if self.drawAll:
             pygame.draw.line(win, color.l1, (self.x0, 0), (self.x0, 700))
             pygame.draw.line(win, color.l1, (self.x1, 0), (self.x1, 700))
@@ -148,14 +154,12 @@ class Laser:
 
 def newPlatforms(cameraShift, score):
     # gap between them
-    if score <= 10:
+    if score <= 25:
         gap_lower, gap_upper= 48, 68
-    elif score <= 25:
+    elif score <= 75:
         gap_lower, gap_upper = 68, 88
-    elif score <= 50:
-        gap_lower, gap_upper = 88, 108
     else:
-        gap_lower, gap_upper = 108, 125 
+        gap_lower, gap_upper = 88, 108 
     # deleting platforms outside of screen 
     i = 0
     while(i < len(platforms)):
@@ -175,10 +179,12 @@ def reset():
     platforms.clear()
     win.fill((255,255,255))
 
-def newLaser(score):
-    if(score >= 5):
-        if(random.randint(0,200) == 100 and len(lasers)<maxLasers):
-            lasers.append(Laser())
+def newLaser(score, maxLasers):
+    if(score >= 25):
+        print(maxLasers)
+        if(len(lasers)<maxLasers+1):
+            for i in range(maxLasers):
+                lasers.append(Laser(score))
 
 def main():
     global platforms
@@ -187,6 +193,10 @@ def main():
     clock = pygame.time.Clock()
     cameraShift = 0
     player.dx = 0
+    
+    laser_timer = 0
+    maxLasers = 1
+
     platforms.append(Platform(500))
     player.jump()
 
@@ -197,10 +207,17 @@ def main():
         score = int(cameraShift/200)
         clock.tick(60)
         
+        laser_timer += 1
+        if(laser_timer > random.randint(200,500)):
+            if score>=100 and score<125:
+                maxLasers = 2
+            elif score>=125:
+                maxLasers = 3
+            newLaser(score, maxLasers)
+            laser_timer = 0
+
         # generating new plats
         newPlatforms(cameraShift, score)
-        # generating a laser
-        newLaser(score)
         
         player.dy += player.gravity
         player.setY(player.y + player.dy)
