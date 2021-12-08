@@ -13,7 +13,6 @@ other_particles = []
 lasers = []
 
 cameraShift = 0
-prePoint = None
 
 #colors
 class color():
