@@ -34,7 +34,11 @@ def draw_text(text, font, color, surface, y):
     surface.blit(textobj, textrect)
 
 def check_hover(pos):
-    pass
+    for button in buttons:
+        if(button.rect.collidepoint(pos)):
+            button.color = (150,150,150)
+        else:
+            button.color = (255,255,255)
 
 def main_menu():
     play = Button(75, 225, 250, 'Play')
