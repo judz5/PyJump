@@ -1,4 +1,5 @@
 import pygame, sys
+import PythonJump as pog
 from pygame.locals import *
 
 mainClock = pygame.time.Clock()
@@ -40,7 +41,15 @@ def check_hover(pos):
         else:
             button.color = (255,255,255)
 
+def check_pos(pos):
+    for button in buttons:
+        if(button.rect.collidepoint(pos)):
+            return button.text
+    return ''
+
 def main_menu():
+    check = ''
+   
     play = Button(75, 225, 250, 'Play')
     shop = Button(75, 225, 375, 'Shop')
     stop = Button(75, 225, 500, 'Quit')
@@ -55,6 +64,14 @@ def main_menu():
         mouse = pygame.mouse.get_pos()
 
         check_hover(mouse)
+        
+        if(check == 'Play'):
+            pog.main()
+        elif(check == 'Shop'):
+            pass
+        elif(check == 'Quit'):
+            pygame.quit()
+            sys.exit()
 
         for button in buttons:
             button.draw_button()
@@ -68,9 +85,10 @@ def main_menu():
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+            if event.type == pygame.MOUSEBUTTONUP:
+                check = check_pos(mouse)
 
         pygame.display.update()
         mainClock.tick(60)
 
 
-main_menu()

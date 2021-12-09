@@ -1,7 +1,5 @@
-import pygame
-import math
-import random
-import time
+import pygame, math, random, time
+import mainMenu as mac
 
 pygame.init()
 win = pygame.display.set_mode([500,700])
@@ -185,6 +183,8 @@ def newLaser(score, maxLasers):
             for i in range(maxLasers):
                 lasers.append(Laser(score))
 
+mac.main_menu()
+
 def main():
     global platforms
     run = True
@@ -319,5 +319,3 @@ def main():
 
     pygame.quit()
 
-
-main()
