@@ -196,7 +196,7 @@ def main():
     platforms.append(Platform(500))
     player.jump()
 
-    myfont = pygame.font.SysFont('Comic Sans MS', 30)
+    myfont = pygame.font.Font('dogicapixel.ttf', 25)
 
     while run:
         win.fill(color.black)
