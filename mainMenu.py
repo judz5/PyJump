@@ -91,4 +91,4 @@ def main_menu():
         pygame.display.update()
         mainClock.tick(60)
 
-
+main_menu()

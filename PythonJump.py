@@ -1,5 +1,4 @@
 import pygame, math, random, time
-import mainMenu as mac
 
 pygame.init()
 win = pygame.display.set_mode([500,700])
@@ -112,12 +111,12 @@ class Laser:
         self.x0 = self.x - 100
         self.x1 = self.x + 100
 
-        if score<=35:
+        if score<=50:
             self.speed = 1
         elif score<=100:
             self.speed = 2
         elif score<=150:
-            self.speed = 2
+            maxLasers = 2
 
     def shift(self):
         if(self.x0 != self.x and self.x1 != self.x):
@@ -182,8 +181,6 @@ def newLaser(score, maxLasers):
         if(len(lasers)<maxLasers+1):
             for i in range(maxLasers):
                 lasers.append(Laser(score))
-
-mac.main_menu()
 
 def main():
     global platforms
