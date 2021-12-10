@@ -135,10 +135,10 @@ class Laser:
             self.effect()
             
     def checkDeath(self, player):
-        print("Checking if you died")
+        global player_dead
         if(player.rect.centerx > self.x - 25 and player.rect.centerx < self.x + 25):
-            print("uh you shouldve died")
             player.kill()
+            player_dead = True
 
     def remove(self):
         lasers.clear()
@@ -193,6 +193,9 @@ def main():
     laser_timer = 0
     maxLasers = 1
 
+    global player_dead
+    player_dead = False
+
     platforms.append(Platform(500))
     player.jump()
 
@@ -220,7 +223,8 @@ def main():
         
         # Check if hits bottom relative to camera shift
         if player.y > 680-cameraShift:
-            run = False
+           player.kill()
+           player_dead = True
         
         # Getting the Camera Shift 
         if player.y < win.get_height() // 2 - 40:
@@ -292,6 +296,10 @@ def main():
             # Removing old particles 
             if particle.timer <= 0:
                 other_particles.remove(particle)
+
+        if(player_dead):
+            run = False
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
