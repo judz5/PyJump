@@ -1,15 +1,25 @@
-import pygame, math, random, time
+import pygame, math, random, time, sys
+from pygame.locals import *
+
+mainClock = pygame.time.Clock()
 
 pygame.init()
+
 win = pygame.display.set_mode([500,700])
+win_rect = win.get_rect()
+win_rect_center = win_rect.center
 
 platforms = []
 particles = []
 other_particles = []
-
+buttons = []
 lasers = []
 
 cameraShift = 0
+
+main_Font = pygame.font.Font('dogicapixel.ttf', 60)
+button_Font = pygame.font.Font('dogicapixel.ttf', 30)
+score_font = pygame.font.Font('dogicapixel.ttf', 25)
 
 #colors
 class color():
@@ -101,7 +111,6 @@ class Player:
         for i in range(50):
             other_particles.append(Particle([self.rect.centerx, self.rect.centery], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.pink))
 
-
 class Laser:
     def __init__(self, score):
         self.x = random.randint(50, 450)
@@ -170,23 +179,54 @@ def newPlatforms(cameraShift, score):
         plat = Platform(platforms[-1].y - gap)
         platforms.append(plat)
 
-def reset():
-    global platforms
-    platforms.clear()
-    win.fill((255,255,255))
-
 def newLaser(score, maxLasers):
     if(score >= 25):
-        print(maxLasers)
         if(len(lasers)<maxLasers+1):
             for i in range(maxLasers):
                 lasers.append(Laser(score))
 
-def main():
+class Button():
+    def __init__(self, height, width, y, text):
+        self.height = height
+        self.width = width
+        self.y = y
+        self.rect = pygame.Rect(250-(self.width/2), self.y, self.width, self.height)
+        self.text = text
+        self.color = (255,255,255)
+
+    def draw_button(self):
+        pygame.draw.rect(win, self.color, self.rect)
+
+    def add_text(self):
+        draw_text(self.text, button_Font, (0,0,0), win, self.rect.centery)
+
+def draw_text(text, font, color, surface, y):
+    textobj = font.render(text, 1, color)
+    textrect = textobj.get_rect(center=(win.get_width()/2, y))
+    #textrect.topleft = (x, y)
+    surface.blit(textobj, textrect)
+
+def check_hover(pos):
+    for button in buttons:
+        if(button.rect.collidepoint(pos)):
+            button.color = (150,150,150)
+        else:
+            button.color = (255,255,255)
+
+def check_pos(pos):
+    for button in buttons:
+        if(button.rect.collidepoint(pos)):
+            return button.text
+    return ''
+
+def game():
     global platforms
+    
     run = True
+    
     player = Player()
     clock = pygame.time.Clock()
+    
     cameraShift = 0
     player.dx = 0
     
@@ -196,10 +236,13 @@ def main():
     global player_dead
     player_dead = False
 
+    platforms.clear()
+    particles.clear()
+    other_particles.clear()
+    lasers.clear()
+
     platforms.append(Platform(500))
     player.jump()
-
-    myfont = pygame.font.Font('dogicapixel.ttf', 25)
 
     while run:
         win.fill(color.black)
@@ -222,7 +265,7 @@ def main():
         player.setY(player.y + player.dy)
         
         # Check if hits bottom relative to camera shift
-        if player.y > 680-cameraShift:
+        if player.y > 680-cameraShift and not player_dead:
            player.kill()
            player_dead = True
         
@@ -266,7 +309,7 @@ def main():
 
         # score
         output = "Score = %d" % score
-        textSurface = myfont.render(output, False, color.white)
+        textSurface = score_font.render(output, False, color.white)
         win.blit(textSurface,(0,0))
 
         for laser in lasers:
@@ -298,8 +341,8 @@ def main():
                 other_particles.remove(particle)
 
         if(player_dead):
-            run = False
-
+            if(len(other_particles)==0):
+                menu()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -319,8 +362,55 @@ def main():
         if not player.x+player.dx < 0 and not player.x+player.dx > 450:
             player.setX(player.x + player.dx)
 
-        player.drawPlayer(cameraShift)
+        if not player_dead:
+            player.drawPlayer(cameraShift)
+        
         pygame.display.update()
 
     pygame.quit()
 
+def menu():
+    check = ''
+   
+    play = Button(75, 225, 250, 'Play')
+    shop = Button(75, 225, 375, 'Shop')
+    stop = Button(75, 225, 500, 'Quit')
+
+    buttons.append(play)
+    buttons.append(shop)
+    buttons.append(stop)
+    while True:
+        win.fill((0,0,0))
+        draw_text('Py-Jump', main_Font, (255,255,255), win, 150)
+        draw_text('BETA 1.0', score_font, (255,255,255), win, 200)
+        mouse = pygame.mouse.get_pos()
+
+        check_hover(mouse)
+        
+        if(check == 'Play'):
+            game()
+        elif(check == 'Shop'):
+            pass
+        elif(check == 'Quit'):
+            pygame.quit()
+            sys.exit()
+
+        for button in buttons:
+            button.draw_button()
+            button.add_text()
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+            if event.type == pygame.MOUSEBUTTONUP:
+                check = check_pos(mouse)
+
+        pygame.display.update()
+        mainClock.tick(60)
+        
+menu()

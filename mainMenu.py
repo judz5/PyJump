@@ -1,5 +1,4 @@
 import pygame, sys
-import PythonJump as pog
 from pygame.locals import *
 
 mainClock = pygame.time.Clock()
@@ -66,7 +65,7 @@ def main_menu():
         check_hover(mouse)
         
         if(check == 'Play'):
-            pog.main()
+            break
         elif(check == 'Shop'):
             pass
         elif(check == 'Quit'):
@@ -91,4 +90,4 @@ def main_menu():
         pygame.display.update()
         mainClock.tick(60)
 
-main_menu()
+
