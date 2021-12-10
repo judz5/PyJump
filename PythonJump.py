@@ -356,10 +356,18 @@ def game():
                     player.dx = -10 
                 if event.key == pygame.K_d:
                     player.dx = 10
+                if event.key == pygame.K_LEFT:
+                    player.dx = -10
+                if event.key == pygame.K_RIGHT:
+                    player.dx = 10
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     player.dx = 0 
                 if event.key == pygame.K_d:
+                    player.dx = 0
+                if event.key == pygame.K_LEFT:
+                    player.dx = 0
+                if event.key == pygame.K_RIGHT:
                     player.dx = 0
 
         # Stay in bounds  
