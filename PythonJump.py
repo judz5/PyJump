@@ -127,7 +127,6 @@ class Laser:
         elif score<=150:
             self.speed = 2
             
-
     def shift(self):
         if(self.x0 != self.x and self.x1 != self.x):
             self.x0 += self.speed
@@ -151,7 +150,7 @@ class Laser:
             player_dead = True
 
     def remove(self):
-        lasers.clear()
+        lasers.remove(self)
 
     def effect(self):
         for i in range(0, 700, 10):
@@ -182,7 +181,7 @@ def newPlatforms(cameraShift, score):
 
 def newLaser(score, maxLasers):
     if(score >= 25):
-        if(len(lasers)<maxLasers+1):
+        if(len(lasers)<maxLasers):
             for i in range(maxLasers):
                 lasers.append(Laser(score))
 
@@ -313,8 +312,10 @@ def game():
         textSurface = score_font.render(output, False, color.white)
         win.blit(textSurface,(0,0))
 
-        if(score>=1):
+        if(score>=100):
             maxLasers = 2
+        else:
+            maxLasers = 1
 
         for laser in lasers:
             laser.shift()
@@ -394,7 +395,7 @@ def menu():
     while True:
         win.fill((0,0,0))
         draw_text('Py-Jump', main_Font, (255,255,255), win, 150)
-        draw_text('BETA 1.0', score_font, (255,255,255), win, 200)
+        draw_text('Beta 1.0', score_font, (255,255,255), win, 200)
         mouse = pygame.mouse.get_pos()
 
         check_hover(mouse)
@@ -402,7 +403,7 @@ def menu():
         if(check == 'Play'):
             game()
         elif(check == 'Shop'):
-            pass
+            pass # add later shop()
         elif(check == 'Quit'):
             pygame.quit()
             sys.exit()
