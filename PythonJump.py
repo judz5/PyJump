@@ -125,7 +125,8 @@ class Laser:
         elif score<=100:
             self.speed = 2
         elif score<=150:
-            maxLasers = 2
+            self.speed = 2
+            
 
     def shift(self):
         if(self.x0 != self.x and self.x1 != self.x):
@@ -311,6 +312,9 @@ def game():
         output = "Score = %d" % score
         textSurface = score_font.render(output, False, color.white)
         win.blit(textSurface,(0,0))
+
+        if(score>=1):
+            maxLasers = 2
 
         for laser in lasers:
             laser.shift()
