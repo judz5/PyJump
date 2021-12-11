@@ -1,9 +1,11 @@
-import pygame, math, random, time, sys
+import pygame, math, random, time, sys, os
 from pygame.locals import *
 
 mainClock = pygame.time.Clock()
 
 pygame.init()
+pygame.font.init()
+pygame.mixer.init()
 
 win = pygame.display.set_mode([500,700])
 win_rect = win.get_rect()
@@ -21,6 +23,14 @@ main_Font = pygame.font.Font('dogicapixel.ttf', 60)
 button_Font = pygame.font.Font('dogicapixel.ttf', 30)
 score_font = pygame.font.Font('dogicapixel.ttf', 25)
 
+s = 'sound'
+
+jumpSound = pygame.mixer.Sound(os.path.join(s, 'jump.wav'))
+highJumpSound = pygame.mixer.Sound(os.path.join(s, 'highJump2.wav'))
+deathSound = pygame.mixer.Sound(os.path.join(s, 'death.wav'))
+laserSound = pygame.mixer.Sound(os.path.join(s, "explosion.wav"))
+selectSound = pygame.mixer.Sound(os.path.join(s, "blipSelect.wav"))
+
 #colors
 class color():
 
@@ -36,6 +46,17 @@ class color():
     l1 = (128,0,0)
     l2 = (255,65,65)
 
+    laser_color = None
+
+    background_color =  (2,1,7) 
+    breaking_color = (25,43,57)
+    spring_color = (136, 159, 179)
+    moving_color = (88,132,132)
+    platform_color = (56,85,96)
+    player_color = (135,96,144)
+    laser_color = (66,44,91)
+
+
 class Particle():
     def __init__(self, pos, vel, timer, color):
         self.pos = pos
@@ -49,17 +70,17 @@ class Platform:
         self.dx = 0
         self.y = y
         self.rect = None
-        self.color = color.blue
+        self.color = color.platform_color
         x = random.randint(0,20)
         if(x <= 1):
             self.type = 1
         elif(x == 10):
             self.type = 2
-            self.color = color.red
+            self.color = color.breaking_color
         elif(x == 15):
             self.type = 3
             self.dx = 5
-            self.color = color.green
+            self.color = color.moving_color
         else:
             self.type = 0
         
@@ -74,7 +95,7 @@ class Platform:
 
     def drawPlatform(self, cameraShift):
         if(self.type == 1):
-            pygame.draw.rect(win, color.orange, (self.x-18, self.y-15+cameraShift, 37, 10))
+            pygame.draw.rect(win, color.spring_color, (self.x-18, self.y-15+cameraShift, 37, 10))
         
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
         pygame.draw.rect(win, self.color, self.rect)
@@ -93,7 +114,7 @@ class Player:
     def drawPlayer(self,cameraShift):
         #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
         self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
-        pygame.draw.rect(win, color.pink  , self.rect)
+        pygame.draw.rect(win, color.player_color, self.rect)
 
     def setY(self, y):
         self.y = y
@@ -102,14 +123,18 @@ class Player:
         self.x = x
  
     def jump(self):
+        pygame.mixer.Sound.play(jumpSound)
         self.dy = -10
 
     def highJump(self):
+        pygame.mixer.Sound.play(highJumpSound)
         self.dy = -20
 
     def kill(self):
+        pygame.mixer.Sound.play(deathSound)
+        pygame.mixer.music.fadeout(2800)
         for i in range(50):
-            other_particles.append(Particle([self.rect.centerx, self.rect.centery], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.pink))
+            other_particles.append(Particle([self.rect.centerx, self.rect.centery], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.player_color))
 
 class Laser:
     def __init__(self, score):
@@ -135,10 +160,10 @@ class Laser:
             self.drawAll = False
 
     def drawLaser(self, player):
-        pygame.draw.line(win, color.l1, (self.x, 0), (self.x, 700))
+        #pygame.draw.line(win, color.l1, (self.x, 0), (self.x, 700))
         if self.drawAll:
-            pygame.draw.line(win, color.l1, (self.x0, 0), (self.x0, 700))
-            pygame.draw.line(win, color.l1, (self.x1, 0), (self.x1, 700))
+            pygame.draw.line(win, color.laser_color, (self.x0, 0), (self.x0, 700))
+            pygame.draw.line(win, color.laser_color, (self.x1, 0), (self.x1, 700))
         else:
             self.checkDeath(player)
             self.effect()
@@ -153,8 +178,9 @@ class Laser:
         lasers.remove(self)
 
     def effect(self):
+        pygame.mixer.Sound.play(laserSound)
         for i in range(0, 700, 10):
-            other_particles.append(Particle([self.x, i], [random.randint(0, 20) / 10 - 1, random.uniform(-1.0,-2.0)], random.randint(2, 6),color.l1))
+            other_particles.append(Particle([self.x, i], [random.randint(0, 20) / 10 - 1, random.uniform(-1.0,-2.0)], random.randint(2, 6),color.laser_color))
         self.remove()
 
 def newPlatforms(cameraShift, score):
@@ -209,9 +235,9 @@ def draw_text(text, font, color, surface, y):
 def check_hover(pos):
     for button in buttons:
         if(button.rect.collidepoint(pos)):
-            button.color = (150,150,150)
+            button.color = color.breaking_color
         else:
-            button.color = (255,255,255)
+            button.color = color.platform_color
 
 def check_pos(pos):
     for button in buttons:
@@ -242,10 +268,15 @@ def game():
     lasers.clear()
 
     platforms.append(Platform(500))
-    player.jump()
+    player.dy = -10
+
+    pygame.mixer.music.load(os.path.join(s, "music.mp3"))
+    pygame.mixer.music.set_volume(0.25)
+
+    pygame.mixer.music.play(-1)
 
     while run:
-        win.fill(color.black)
+        win.fill(color.background_color)
         score = int(cameraShift/200)
         clock.tick(60)
         
@@ -304,7 +335,7 @@ def game():
                         for i in range(5):
                             particles.append(Particle([player.rect.centerx, plat.y-5], [random.randint(0, 20) / 10 - 1, -1.5], random.randint(2, 6),color.white))
                         for i in range(50):
-                            particles.append(Particle([plat.x, plat.y+20], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.red))
+                            particles.append(Particle([plat.x, plat.y+20], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.breaking_color))
                         plat.y = 1000
 
         # score
@@ -385,26 +416,41 @@ def game():
 def menu():
     check = ''
    
-    play = Button(75, 225, 250, 'Play')
-    shop = Button(75, 225, 375, 'Shop')
-    stop = Button(75, 225, 500, 'Quit')
+    play = Button(75, 225, 225, 'Play')
+    shop = Button(75, 225, 325, 'Shop')
+    option = Button(75, 225, 425, 'Options')
+    stop = Button(75, 225, 525, 'Quit')
 
     buttons.append(play)
     buttons.append(shop)
+    buttons.append(option)
     buttons.append(stop)
+
+    pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
+    pygame.mixer.music.set_volume(0.25)
+
+    pygame.mixer.music.play(-1)
     while True:
-        win.fill((0,0,0))
-        draw_text('Py-Jump', main_Font, (255,255,255), win, 150)
-        draw_text('Beta 1.0', score_font, (255,255,255), win, 200)
+        win.fill(color.background_color)
+        draw_text('Py-Jump', main_Font, color.moving_color, win, 125)
+        draw_text('Beta 1.0', score_font, color.moving_color, win, 175)
         mouse = pygame.mouse.get_pos()
 
         check_hover(mouse)
         
         if(check == 'Play'):
+            pygame.mixer.Sound.play(selectSound)
+            pygame.mixer.music.fadeout(1000)
             game()
         elif(check == 'Shop'):
-            pass # add later shop()
+            pygame.mixer.Sound.play(selectSound)
+            check = ""
+        elif(check == 'Options'):
+            pygame.mixer.Sound.play(selectSound)
+            options()
         elif(check == 'Quit'):
+            pygame.mixer.Sound.play(selectSound)
+            time.sleep(0.25)
             pygame.quit()
             sys.exit()
 
@@ -425,5 +471,27 @@ def menu():
 
         pygame.display.update()
         mainClock.tick(60)
-        
+
+def options():
+
+    #pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
+    #pygame.mixer.music.set_volume(0.25)
+
+    #pygame.mixer.music.play(-1)
+
+    while True:
+        win.fill(color.background_color)
+        draw_text('Options', main_Font, color.moving_color, win, 125)
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    menu()
+
+        pygame.display.update()
+        mainClock.tick(60)
+
 menu()
