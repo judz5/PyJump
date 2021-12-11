@@ -16,6 +16,7 @@ particles = []
 other_particles = []
 buttons = []
 lasers = []
+square_effects = []
 
 score = 0
 cameraShift = 0
@@ -33,6 +34,7 @@ laserSound = pygame.mixer.Sound(os.path.join(s, "explosion.wav"))
 selectSound = pygame.mixer.Sound(os.path.join(s, "blipSelect.wav"))
 
 musicOn = True
+sfxEnabled = True
 
 #colors
 class color():
@@ -58,7 +60,7 @@ class color():
     platform_color = (56,85,96)
     player_color = (135,96,144)
     laser_color = (66,44,91)
-
+    polygon_color = (33,21,56)
 
 class Particle():
     def __init__(self, pos, vel, timer, color):
@@ -126,15 +128,15 @@ class Player:
         self.x = x
  
     def jump(self):
-        pygame.mixer.Sound.play(jumpSound)
+        playSound(jumpSound)
         self.dy = -10
 
     def highJump(self):
-        pygame.mixer.Sound.play(highJumpSound)
+        playSound(highJumpSound)
         self.dy = -20
 
     def kill(self):
-        pygame.mixer.Sound.play(deathSound)
+        playSound(deathSound)
         pygame.mixer.music.fadeout(2800)
         for i in range(50):
             other_particles.append(Particle([self.rect.centerx, self.rect.centery], [random.randint(0, 20) / 10 - 1, random.uniform(-2.0,-4.0)], random.randint(2, 8),color.player_color))
@@ -181,7 +183,7 @@ class Laser:
         lasers.remove(self)
 
     def effect(self):
-        pygame.mixer.Sound.play(laserSound)
+        playSound(laserSound)
         for i in range(0, 700, 10):
             other_particles.append(Particle([self.x, i], [random.randint(0, 20) / 10 - 1, random.uniform(-1.0,-2.0)], random.randint(2, 6),color.laser_color))
         self.remove()
@@ -248,6 +250,17 @@ def check_pos(pos):
             return button.text
     return ''
 
+def advance(loc, angle, amt):
+    new_loc = loc.copy()
+    new_loc[0] += math.cos(math.radians(angle)) * amt
+    new_loc[1] += math.sin(math.radians(angle)) * amt
+    return new_loc
+
+def playSound(sfx):
+    global sfxEnabled
+    if(sfxEnabled):
+        pygame.mixer.Sound.play(sfx)
+
 def game():
     global platforms, musicOn, score
     
@@ -284,7 +297,7 @@ def game():
         win.fill(color.background_color)
         score = int(cameraShift/200)
         clock.tick(60)
-        
+
         laser_timer += 1
         if(laser_timer > random.randint(200,500)):
             if score>=100 and score<125:
@@ -312,6 +325,25 @@ def game():
                 cameraShift = temp
             else:
                 pass
+
+        if random.randint(1, 60) == 1:
+            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+        # this is stolen from dafluffypotato sorry ¯\_(ツ)_/¯
+        for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
+            effect[0][1] += effect[2]
+            effect[1] += effect[2] * effect[4]
+            effect[3] -= effect[4]
+            points = [
+                advance(effect[0], math.degrees(effect[1]), effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 90, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 180, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 270, effect[3]),
+            ]
+            points = [[v[0], v[1]] for v in points]
+            if effect[3] < 1:
+                square_effects.pop(i)
+            else:
+                pygame.draw.polygon(win, color.polygon_color, points, 2)
 
         # Drawing platforms from list
         for plat in platforms:
@@ -418,8 +450,10 @@ def game():
 
     pygame.quit()
 
+checkMusic = True
+
 def menu():
-    global musicOn
+    global musicOn, checkMusic
     check = ''
     buttons.clear()
 
@@ -433,14 +467,32 @@ def menu():
     buttons.append(option)
     buttons.append(stop)
 
-    pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
-    pygame.mixer.music.set_volume(0.25)
-
-    if musicOn:
+    if musicOn and checkMusic:
+        pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
+        pygame.mixer.music.set_volume(0.25)
         pygame.mixer.music.play(-1)
-
+    
     while True:
         win.fill(color.background_color)
+        
+        if random.randint(1, 60) == 1:
+            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+        for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
+            effect[0][1] += effect[2]
+            effect[1] += effect[2] * effect[4]
+            effect[3] -= effect[4]
+            points = [
+                advance(effect[0], math.degrees(effect[1]), effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 90, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 180, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 270, effect[3]),
+            ]
+            points = [[v[0], v[1]] for v in points]
+            if effect[3] < 1:
+                square_effects.pop(i)
+            else:
+                pygame.draw.polygon(win, color.polygon_color, points, 2)
+        
         draw_text('Py-Jump', main_Font, color.moving_color, win, 125)
         draw_text('Beta 1.1', score_font, color.moving_color, win, 175)
         mouse = pygame.mouse.get_pos()
@@ -448,17 +500,17 @@ def menu():
         check_hover(mouse)
         
         if(check == 'Play'):
-            pygame.mixer.Sound.play(selectSound)
+            playSound(selectSound)
             pygame.mixer.music.fadeout(1000)
             game()
         elif(check == 'Shop'):
-            pygame.mixer.Sound.play(selectSound)
+            playSound(selectSound)
             check = ""
         elif(check == 'Options'):
-            pygame.mixer.Sound.play(selectSound)
+            playSound(selectSound)
             options()
         elif(check == 'Quit'):
-            pygame.mixer.Sound.play(selectSound)
+            playSound(selectSound)
             time.sleep(0.25)
             pygame.quit()
             sys.exit()
@@ -482,7 +534,7 @@ def menu():
         mainClock.tick(60)
 
 def options():
-    global musicOn
+    global musicOn, checkMusic, sfxEnabled
     buttons.clear()
     check = ''
     #pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
@@ -500,6 +552,25 @@ def options():
 
     while True:
         win.fill(color.background_color)
+        
+        if random.randint(1, 60) == 1:
+            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+        for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
+            effect[0][1] += effect[2]
+            effect[1] += effect[2] * effect[4]
+            effect[3] -= effect[4]
+            points = [
+                advance(effect[0], math.degrees(effect[1]), effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 90, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 180, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 270, effect[3]),
+            ]
+            points = [[v[0], v[1]] for v in points]
+            if effect[3] < 1:
+                square_effects.pop(i)
+            else:
+                pygame.draw.polygon(win, color.polygon_color, points, 2)
+        
         draw_text('Options', main_Font, color.moving_color, win, 125)
 
         mouse = pygame.mouse.get_pos()
@@ -507,7 +578,7 @@ def options():
         check_hover(mouse)
 
         if(check == 'Music'):
-            pygame.mixer.Sound.play(selectSound)
+            playSound(selectSound)
             pygame.mixer.music.stop()
             if musicOn:
                 musicOn = False
@@ -516,11 +587,15 @@ def options():
                 musicOn = True
             check = ''
         elif(check == 'SFX'):
-            pygame.mixer.Sound.play(selectSound)
-            sfxOn = False
+            playSound(selectSound)
+            if sfxEnabled:
+                sfxEnabled = False
+            else:
+                sfxEnabled = True
             check = ''
         elif(check == 'Back'):
-            pygame.mixer.Sound.play(selectSound)
+            playSound(selectSound)
+            checkMusic = False
             menu()
 
         for button in buttons:
@@ -546,6 +621,24 @@ def deathScreen():
     while True:
         win.fill(color.background_color)
 
+        if random.randint(1, 60) == 1:
+            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+        for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
+            effect[0][1] += effect[2]
+            effect[1] += effect[2] * effect[4]
+            effect[3] -= effect[4]
+            points = [
+                advance(effect[0], math.degrees(effect[1]), effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 90, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 180, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 270, effect[3]),
+            ]
+            points = [[v[0], v[1]] for v in points]
+            if effect[3] < 1:
+                square_effects.pop(i)
+            else:
+                pygame.draw.polygon(win, color.polygon_color, points, 2)
+
         draw_text('Score = %d' % score, main_Font, color.moving_color, win, 300)
         draw_text('ESC to Continue', score_font, color.platform_color, win, 350)
 
@@ -555,6 +648,7 @@ def deathScreen():
                 sys.exit()
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
+                    playSound(selectSound)
                     menu()
 
         pygame.display.update()
