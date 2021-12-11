@@ -17,6 +17,7 @@ other_particles = []
 buttons = []
 lasers = []
 
+score = 0
 cameraShift = 0
 
 main_Font = pygame.font.Font('dogicapixel.ttf', 60)
@@ -30,6 +31,8 @@ highJumpSound = pygame.mixer.Sound(os.path.join(s, 'highJump2.wav'))
 deathSound = pygame.mixer.Sound(os.path.join(s, 'death.wav'))
 laserSound = pygame.mixer.Sound(os.path.join(s, "explosion.wav"))
 selectSound = pygame.mixer.Sound(os.path.join(s, "blipSelect.wav"))
+
+musicOn = True
 
 #colors
 class color():
@@ -246,7 +249,7 @@ def check_pos(pos):
     return ''
 
 def game():
-    global platforms
+    global platforms, musicOn, score
     
     run = True
     
@@ -266,6 +269,7 @@ def game():
     particles.clear()
     other_particles.clear()
     lasers.clear()
+    score = 0
 
     platforms.append(Platform(500))
     player.dy = -10
@@ -273,7 +277,8 @@ def game():
     pygame.mixer.music.load(os.path.join(s, "music.mp3"))
     pygame.mixer.music.set_volume(0.25)
 
-    pygame.mixer.music.play(-1)
+    if musicOn:
+        pygame.mixer.music.play(-1)
 
     while run:
         win.fill(color.background_color)
@@ -378,7 +383,7 @@ def game():
 
         if(player_dead):
             if(len(other_particles)==0):
-                menu()
+                deathScreen()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -414,8 +419,10 @@ def game():
     pygame.quit()
 
 def menu():
+    global musicOn
     check = ''
-   
+    buttons.clear()
+
     play = Button(75, 225, 225, 'Play')
     shop = Button(75, 225, 325, 'Shop')
     option = Button(75, 225, 425, 'Options')
@@ -429,11 +436,13 @@ def menu():
     pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
     pygame.mixer.music.set_volume(0.25)
 
-    pygame.mixer.music.play(-1)
+    if musicOn:
+        pygame.mixer.music.play(-1)
+
     while True:
         win.fill(color.background_color)
         draw_text('Py-Jump', main_Font, color.moving_color, win, 125)
-        draw_text('Beta 1.0', score_font, color.moving_color, win, 175)
+        draw_text('Beta 1.1', score_font, color.moving_color, win, 175)
         mouse = pygame.mouse.get_pos()
 
         check_hover(mouse)
@@ -473,15 +482,72 @@ def menu():
         mainClock.tick(60)
 
 def options():
-
+    global musicOn
+    buttons.clear()
+    check = ''
     #pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
     #pygame.mixer.music.set_volume(0.25)
 
     #pygame.mixer.music.play(-1)
 
+    mus = Button(75, 225, 225, 'Music')
+    sfx = Button(75, 225, 325, 'SFX')
+    back = Button(75, 225, 425, "Back")
+
+    buttons.append(mus)
+    buttons.append(sfx)
+    buttons.append(back)
+
     while True:
         win.fill(color.background_color)
         draw_text('Options', main_Font, color.moving_color, win, 125)
+
+        mouse = pygame.mouse.get_pos()
+
+        check_hover(mouse)
+
+        if(check == 'Music'):
+            pygame.mixer.Sound.play(selectSound)
+            pygame.mixer.music.stop()
+            if musicOn:
+                musicOn = False
+            else:
+                pygame.mixer.music.play(-1)
+                musicOn = True
+            check = ''
+        elif(check == 'SFX'):
+            pygame.mixer.Sound.play(selectSound)
+            sfxOn = False
+            check = ''
+        elif(check == 'Back'):
+            pygame.mixer.Sound.play(selectSound)
+            menu()
+
+        for button in buttons:
+            button.draw_button()
+            button.add_text()
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    menu()
+            if event.type == pygame.MOUSEBUTTONUP:
+                check = check_pos(mouse)
+        
+        pygame.display.update()
+        mainClock.tick(60)
+
+def deathScreen():
+    global score
+
+    while True:
+        win.fill(color.background_color)
+
+        draw_text('Score = %d' % score, main_Font, color.moving_color, win, 300)
+        draw_text('ESC to Continue', score_font, color.platform_color, win, 350)
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -493,5 +559,4 @@ def options():
 
         pygame.display.update()
         mainClock.tick(60)
-
 menu()
