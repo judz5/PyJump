@@ -1,4 +1,4 @@
-import pygame, math, random, time, sys, os
+import pygame, math, random, time, sys, os, pickle
 from pygame.locals import *
 
 mainClock = pygame.time.Clock()
@@ -616,7 +616,7 @@ def options():
 def store():
     global checkMusic
     buttons.clear()
-    back = Button(75, 225, 425, "Back")
+    back = Button(75, 225, 225, "Back")
         
     buttons.append(back)
 
@@ -674,6 +674,8 @@ def store():
 def deathScreen():
     global score
 
+    scoreNotChecked = True
+
     while True:
         win.fill(color.background_color)
 
@@ -695,6 +697,25 @@ def deathScreen():
             else:
                 pygame.draw.polygon(win, color.polygon_color, points, 2)
 
+        if(scoreNotChecked):
+            try:
+                with open('score.dat', 'rb') as file:
+                    score_data = pickle.load(file)
+            except:
+                score_data = 0
+
+            if(score>score_data):
+                isHighScore = True
+                with open('score.dat', 'wb') as file:
+                    pickle.dump(score, file) 
+            else:
+                isHighScore = False
+            
+            scoreNotChecked = False
+
+        if(isHighScore):
+            draw_text('New High Score!', button_Font, color.moving_color, win, 250)
+              
         draw_text('Score = %d' % score, main_Font, color.moving_color, win, 300)
         draw_text('ESC to Continue', score_font, color.platform_color, win, 350)
 
