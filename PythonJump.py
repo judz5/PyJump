@@ -223,12 +223,14 @@ def draw_text(text, font, color, surface, y):
     #textrect.topleft = (x, y)
     surface.blit(textobj, textrect)
 
-def check_hover(pos):
-    for button in buttons:
-        if(button.rect.collidepoint(pos)):
-            button.color = color.breaking_color
-        else:
-            button.color = color.platform_color
+def check_hover(sel):
+    # for button in buttons:
+    #     if(button.rect.collidepoint(pos)):
+    #         button.color = color.breaking_color
+    #     else:
+    #         button.color = color.platform_color
+    buttons[sel].color = color.breaking_color
+    
 
 def check_pos(pos):
     for button in buttons:
@@ -458,7 +460,7 @@ def menu():
         pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
         pygame.mixer.music.set_volume(0.25)
         pygame.mixer.music.play(-1)
-    
+    selected = 0
     while True:
         win.fill(color.background_color)
         
@@ -483,8 +485,10 @@ def menu():
         draw_text('Py-Jump', main_Font, color.moving_color, win, 125)
         draw_text('Beta 1.1', score_font, color.moving_color, win, 175)
         
-        mouse = pygame.mouse.get_pos()
-        check_hover(mouse)
+        #mouse = pygame.mouse.get_pos()
+        for button in buttons:
+            button.color = color.platform_color
+        check_hover(selected)
         
         if(check == 'Play'):
             playSound(selectSound)
@@ -514,8 +518,28 @@ def menu():
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-            if event.type == pygame.MOUSEBUTTONUP:
-                check = check_pos(mouse)
+                if event.key == K_w:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 3
+                if event.key == K_s:
+                    if(selected<3):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_DOWN:
+                    if(selected<3):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_UP:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 3
+                if event.key == K_RETURN:
+                    check = buttons[selected].text
 
         pygame.display.update()
         mainClock.tick(60)
@@ -537,6 +561,7 @@ def options():
     buttons.append(sfx)
     buttons.append(back)
 
+    selected = 0
     while True:
         win.fill(color.background_color)
         
@@ -560,9 +585,9 @@ def options():
         
         draw_text('Options', main_Font, color.moving_color, win, 125)
 
-        mouse = pygame.mouse.get_pos()
-
-        check_hover(mouse)
+        for button in buttons:
+            button.color = color.platform_color
+        check_hover(selected)
 
         if(check == 'Music'):
             playSound(selectSound)
@@ -595,9 +620,30 @@ def options():
                 sys.exit()
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    menu()
-            if event.type == pygame.MOUSEBUTTONUP:
-                check = check_pos(mouse)
+                    pygame.quit()
+                    sys.exit()
+                if event.key == K_w:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 3
+                if event.key == K_s:
+                    if(selected<3):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_DOWN:
+                    if(selected<3):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_UP:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 3
+                if event.key == K_RETURN:
+                    check = buttons[selected].text
         
         pygame.display.update()
         mainClock.tick(60)
@@ -610,6 +656,7 @@ def store():
     buttons.append(back)
 
     check = ''
+    selected = 0
     while True:
         win.fill(color.background_color)
         
@@ -634,8 +681,9 @@ def store():
         draw_text('Under', button_Font, color.moving_color, win, 125)
         draw_text('Construction', button_Font, color.moving_color, win, 160)
 
-        mouse = pygame.mouse.get_pos()
-        check_hover(mouse)
+        for button in buttons:
+            button.color = color.platform_color
+        check_hover(selected)
 
         if(check == 'Back'):
             playSound(selectSound)
@@ -654,9 +702,28 @@ def store():
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-            if event.type == pygame.MOUSEBUTTONUP:
-                check = check_pos(mouse)
-
+                if event.key == K_w:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 3
+                if event.key == K_s:
+                    if(selected<3):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_DOWN:
+                    if(selected<3):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_UP:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 3
+                if event.key == K_RETURN:
+                    check = buttons[selected].text
         pygame.display.update()
         mainClock.tick(60)
 
