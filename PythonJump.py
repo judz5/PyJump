@@ -375,8 +375,9 @@ def game():
 
         # score
         output = "Score = %d" % score
-        textSurface = score_font.render(output, False, color.white)
-        win.blit(textSurface,(0,0))
+        #textSurface = score_font.render(output, False, color.white)
+        #win.blit(textSurface,(0,0))
+        draw_text(output, button_Font, color.white, win, 20)
 
         if(score>=100):
             maxLasers = 2
