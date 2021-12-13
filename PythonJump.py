@@ -154,8 +154,8 @@ class Laser:
             self.speed = 1
         elif score<=100:
             self.speed = 2
-        elif score<=150:
-            self.speed = 2
+        elif score>=150:
+            self.speed = 1
             
     def shift(self):
         if(self.x0 != self.x and self.x1 != self.x):
@@ -300,8 +300,8 @@ def game():
         if(laser_timer > random.randint(500,1000)):
             if score>=100 and score<125:
                 maxLasers = 2
-            elif score>=125:
-                maxLasers = 3
+            elif score>125:
+                maxLasers = 2
             newLaser(score, maxLasers)
             laser_timer = 0
 
@@ -503,7 +503,7 @@ def menu():
             game()
         elif(check == 'Shop'):
             playSound(selectSound)
-            check = ""
+            store()
         elif(check == 'Options'):
             playSound(selectSound)
             options()
@@ -613,6 +613,64 @@ def options():
         pygame.display.update()
         mainClock.tick(60)
 
+def store():
+    global checkMusic
+    buttons.clear()
+    back = Button(75, 225, 425, "Back")
+        
+    buttons.append(back)
+
+    check = ''
+    while True:
+        win.fill(color.background_color)
+        
+        if random.randint(1, 60) == 1:
+            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+        for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
+            effect[0][1] += effect[2]
+            effect[1] += effect[2] * effect[4]
+            effect[3] -= effect[4]
+            points = [
+                advance(effect[0], math.degrees(effect[1]), effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 90, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 180, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 270, effect[3]),
+            ]
+            points = [[v[0], v[1]] for v in points]
+            if effect[3] < 1:
+                square_effects.pop(i)
+            else:
+                pygame.draw.polygon(win, color.polygon_color, points, 2)
+        
+        draw_text('Under', button_Font, color.moving_color, win, 125)
+        draw_text('Construction', button_Font, color.moving_color, win, 160)
+
+        mouse = pygame.mouse.get_pos()
+        check_hover(mouse)
+
+        if(check == 'Back'):
+            playSound(selectSound)
+            checkMusic = False
+            menu()
+        
+        for button in buttons:
+            button.draw_button()
+            button.add_text()
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+            if event.type == pygame.MOUSEBUTTONUP:
+                check = check_pos(mouse)
+
+        pygame.display.update()
+        mainClock.tick(60)
+
 def deathScreen():
     global score
 
@@ -647,8 +705,10 @@ def deathScreen():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     playSound(selectSound)
+                    checkMusic = True
                     menu()
 
         pygame.display.update()
         mainClock.tick(60)
+
 menu()
