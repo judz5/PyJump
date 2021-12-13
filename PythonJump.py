@@ -140,9 +140,9 @@ class Laser:
 
         if score<=50:
             self.speed = 1
-        elif score<=100:
+        elif score<=150:
             self.speed = 2
-        elif score>=150:
+        elif score>150:
             self.speed = 1
             
     def shift(self):
