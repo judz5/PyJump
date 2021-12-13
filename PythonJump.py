@@ -626,14 +626,14 @@ def options():
                     if(selected>0):
                         selected -= 1
                     else:
-                        selected = 3
+                        selected = 2
                 if event.key == K_s:
-                    if(selected<3):
+                    if(selected<2):
                         selected += 1
                     else:
                         selected = 0
                 if event.key == K_DOWN:
-                    if(selected<3):
+                    if(selected<2):
                         selected += 1
                     else:
                         selected = 0
@@ -641,7 +641,7 @@ def options():
                     if(selected>0):
                         selected -= 1
                     else:
-                        selected = 3
+                        selected = 2
                 if event.key == K_RETURN:
                     check = buttons[selected].text
         
@@ -702,26 +702,6 @@ def store():
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if event.key == K_w:
-                    if(selected>0):
-                        selected -= 1
-                    else:
-                        selected = 3
-                if event.key == K_s:
-                    if(selected<3):
-                        selected += 1
-                    else:
-                        selected = 0
-                if event.key == K_DOWN:
-                    if(selected<3):
-                        selected += 1
-                    else:
-                        selected = 0
-                if event.key == K_UP:
-                    if(selected>0):
-                        selected -= 1
-                    else:
-                        selected = 3
                 if event.key == K_RETURN:
                     check = buttons[selected].text
         pygame.display.update()
