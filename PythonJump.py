@@ -190,12 +190,10 @@ class Laser:
 
 def newPlatforms(cameraShift, score):
     # gap between them
-    if score <= 25:
+    if score <= 150:
         gap_lower, gap_upper= 48, 68
-    elif score <= 75:
-        gap_lower, gap_upper = 68, 88
     else:
-        gap_lower, gap_upper = 88, 108 
+        gap_lower, gap_upper = 68, 88
     # deleting platforms outside of screen 
     i = 0
     while(i < len(platforms)):
@@ -299,7 +297,7 @@ def game():
         clock.tick(60)
 
         laser_timer += 1
-        if(laser_timer > random.randint(200,500)):
+        if(laser_timer > random.randint(500,1000)):
             if score>=100 and score<125:
                 maxLasers = 2
             elif score>=125:
