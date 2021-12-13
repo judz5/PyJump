@@ -40,19 +40,7 @@ sfxEnabled = True
 class color():
 
     black = (0,0,0) # normal platform
-    navy = (20,33,61) # maybe spring or moving platform
-    orange = (252, 163, 17) # ball
-    pink = (255, 0, 160) # background 
     white = (255,255,255) # background
-    blue = (0,186,255)
-    red = (255,0,0)
-    green = (0,255,0)
-
-    l1 = (128,0,0)
-    l2 = (255,65,65)
-
-    laser_color = None
-
     background_color =  (2,1,7) 
     breaking_color = (25,43,57)
     spring_color = (136, 159, 179)
@@ -494,8 +482,8 @@ def menu():
         
         draw_text('Py-Jump', main_Font, color.moving_color, win, 125)
         draw_text('Beta 1.1', score_font, color.moving_color, win, 175)
+        
         mouse = pygame.mouse.get_pos()
-
         check_hover(mouse)
         
         if(check == 'Play'):
