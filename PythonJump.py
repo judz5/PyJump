@@ -555,10 +555,12 @@ def options():
 
     mus = Button(75, 225, 225, 'Music')
     sfx = Button(75, 225, 325, 'SFX')
-    back = Button(75, 225, 425, "Back")
+    res = Button(75, 225, 425, 'Reset')
+    back = Button(75, 225, 525, "Back")
 
     buttons.append(mus)
     buttons.append(sfx)
+    buttons.append(res)
     buttons.append(back)
 
     selected = 0
@@ -609,6 +611,9 @@ def options():
             playSound(selectSound)
             checkMusic = False
             menu()
+        elif(check == 'Reset'):
+            playSound(selectSound)
+            areYouSure()
 
         for button in buttons:
             button.draw_button()
@@ -626,14 +631,14 @@ def options():
                     if(selected>0):
                         selected -= 1
                     else:
-                        selected = 2
+                        selected = 3
                 if event.key == K_s:
-                    if(selected<2):
+                    if(selected<3):
                         selected += 1
                     else:
                         selected = 0
                 if event.key == K_DOWN:
-                    if(selected<2):
+                    if(selected<3):
                         selected += 1
                     else:
                         selected = 0
@@ -641,7 +646,7 @@ def options():
                     if(selected>0):
                         selected -= 1
                     else:
-                        selected = 2
+                        selected = 3
                 if event.key == K_RETURN:
                     check = buttons[selected].text
         
@@ -764,6 +769,95 @@ def deathScreen():
                     playSound(selectSound)
                     checkMusic = True
                     menu()
+
+        pygame.display.update()
+        mainClock.tick(60)
+
+def areYouSure():
+    global checkMusic
+    buttons.clear()
+
+    yes = Button(75, 225, 225, 'Yes')
+    no = Button(75,225, 325, 'No')
+
+    buttons.append(yes)
+    buttons.append(no)
+
+    selected = 0
+    check = ''
+    while True:
+        win.fill(color.background_color)
+
+        if random.randint(1, 60) == 1:
+            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+        for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
+            effect[0][1] += effect[2]
+            effect[1] += effect[2] * effect[4]
+            effect[3] -= effect[4]
+            points = [
+                advance(effect[0], math.degrees(effect[1]), effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 90, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 180, effect[3]),
+                advance(effect[0], math.degrees(effect[1]) + 270, effect[3]),
+                ]
+            points = [[v[0], v[1]] for v in points]
+            if effect[3] < 1:
+                square_effects.pop(i)
+            else:
+                pygame.draw.polygon(win, color.polygon_color, points, 2)
+
+        draw_text('Are you Sure?', button_Font, color.moving_color, win, 115)
+        draw_text('(This Will Reset', score_font, color.platform_color, win, 155)
+        draw_text('All High Scores)', score_font, color.platform_color, win, 190)
+        
+
+        for button in buttons:
+            button.color = color.platform_color
+        check_hover(selected)
+
+        if(check == 'Yes'):
+            checkMusic = False
+            with open('score.dat', 'wb') as file:
+                    pickle.dump(0, file) 
+            options()
+        elif(check == 'No'):
+            checkMusic = False
+            options()
+
+        for button in buttons:
+            button.draw_button()
+            button.add_text()
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == K_w:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 1
+                if event.key == K_s:
+                    if(selected<1):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_DOWN:
+                    if(selected<1):
+                        selected += 1
+                    else:
+                        selected = 0
+                if event.key == K_UP:
+                    if(selected>0):
+                        selected -= 1
+                    else:
+                        selected = 1
+                if event.key == K_RETURN:
+                    check = buttons[selected].text
 
         pygame.display.update()
         mainClock.tick(60)
