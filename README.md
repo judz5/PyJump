@@ -1,10 +1,12 @@
 # PyJump
-My project has changed from its first idea of drawing strings to a game similar to doodle Jump
+### A Pygame Doodle Jump Clone (With Lasers!)
+If you want to attempt to contribute good luck, my code is a bit jumbled and shoved into one python file.
 
-I changed the project idea because I knew the physics and collision of the lines was going to be too much trouble
-and I feel that making this game which is a simplier concept but making it look good is a better path for me to take
+#
 
-I plan for this game to be fun to play, and have custom made sprites, particles, and other effects to make the game stand out
+This was my second 9 Weeks project for my Independent Study Class.\
+I had alot of fun coding this and making a real game, hopefully it is somewhat enjoyable to play.
 
+All you need is Python and Pygame to play, The highscore can be reset in settings and is stored locally.
 
 
