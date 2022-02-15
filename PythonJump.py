@@ -7,9 +7,11 @@ pygame.init()
 pygame.font.init()
 pygame.mixer.init()
 
-win = pygame.display.set_mode([500,700])
+win = pygame.display.set_mode([500,700], RESIZABLE | DOUBLEBUF)
 win_rect = win.get_rect()
 win_rect_center = win_rect.center
+
+fake_win = win.copy()
 
 platforms = []
 particles = []
@@ -88,10 +90,10 @@ class Platform:
 
     def drawPlatform(self, cameraShift):
         if(self.type == 1):
-            pygame.draw.rect(win, color.spring_color, (self.x-18, self.y-15+cameraShift, 37, 10))
+            pygame.draw.rect(fake_win, color.spring_color, (self.x-18, self.y-15+cameraShift, 37, 10))
         
         self.rect = (self.x - 37, (self.y-5)+cameraShift, 75, 10)
-        pygame.draw.rect(win, self.color, self.rect)
+        pygame.draw.rect(fake_win, self.color, self.rect)
 
 class Player:
     def __init__(self):
@@ -107,7 +109,7 @@ class Player:
     def drawPlayer(self,cameraShift):
         #self.rect = pygame.Rect(self.x-22, self.y+cameraShift-22, 45,45)
         self.rect = pygame.Rect(self.x, self.y+cameraShift, 45,45)
-        pygame.draw.rect(win, color.player_color, self.rect)
+        pygame.draw.rect(fake_win, color.player_color, self.rect)
 
     def setY(self, y):
         self.y = y
@@ -155,8 +157,8 @@ class Laser:
     def drawLaser(self, player):
         #pygame.draw.line(win, color.l1, (self.x, 0), (self.x, 700))
         if self.drawAll:
-            pygame.draw.line(win, color.laser_color, (self.x0, 0), (self.x0, 700))
-            pygame.draw.line(win, color.laser_color, (self.x1, 0), (self.x1, 700))
+            pygame.draw.line(fake_win, color.laser_color, (self.x0, 0), (self.x0, 700))
+            pygame.draw.line(fake_win, color.laser_color, (self.x1, 0), (self.x1, 700))
         else:
             self.checkDeath(player)
             self.effect()
@@ -185,7 +187,7 @@ def newPlatforms(cameraShift, score):
     # deleting platforms outside of screen 
     i = 0
     while(i < len(platforms)):
-        if platforms[i].y+cameraShift > win.get_height():
+        if platforms[i].y+cameraShift > fake_win.get_height():
             del platforms[i]
         i+=1
     i = 0        
@@ -212,14 +214,14 @@ class Button():
         self.color = (255,255,255)
 
     def draw_button(self):
-        pygame.draw.rect(win, self.color, self.rect)
+        pygame.draw.rect(fake_win, self.color, self.rect)
 
     def add_text(self):
-        draw_text(self.text, button_Font, (0,0,0), win, self.rect.centery)
+        draw_text(self.text, button_Font, (0,0,0), fake_win, self.rect.centery)
 
 def draw_text(text, font, color, surface, y):
     textobj = font.render(text, 1, color)
-    textrect = textobj.get_rect(center=(win.get_width()/2, y))
+    textrect = textobj.get_rect(center=(fake_win.get_width()/2, y))
     #textrect.topleft = (x, y)
     surface.blit(textobj, textrect)
 
@@ -250,7 +252,7 @@ def playSound(sfx):
         pygame.mixer.Sound.play(sfx)
 
 def game():
-    global platforms, musicOn, score
+    global platforms, musicOn, score, win, fake_win
     
     run = True
     
@@ -282,7 +284,7 @@ def game():
         pygame.mixer.music.play(-1)
 
     while run:
-        win.fill(color.background_color)
+        fake_win.fill(color.background_color)
         score = int(cameraShift/200)
         clock.tick(60)
 
@@ -307,15 +309,15 @@ def game():
            player_dead = True
         
         # Getting the Camera Shift 
-        if player.y < win.get_height() // 2 - 40:
-            temp = -player.y + win.get_height()/2 - 20
+        if player.y < fake_win.get_height() // 2 - 40:
+            temp = -player.y + fake_win.get_height()/2 - 20
             if temp>cameraShift:
                 cameraShift = temp
             else:
                 pass
 
         if random.randint(1, 60) == 1:
-            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+            square_effects.append([[random.randint(0, fake_win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
         # this is stolen from dafluffypotato sorry ¯\_(ツ)_/¯
         for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
             effect[0][1] += effect[2]
@@ -331,7 +333,7 @@ def game():
             if effect[3] < 1:
                 square_effects.pop(i)
             else:
-                pygame.draw.polygon(win, color.polygon_color, points, 2)
+                pygame.draw.polygon(fake_win, color.polygon_color, points, 2)
 
         # Drawing platforms from list
         for plat in platforms:
@@ -367,7 +369,7 @@ def game():
         output = "Score = %d" % score
         #textSurface = score_font.render(output, False, color.white)
         #win.blit(textSurface,(0,0))
-        draw_text(output, button_Font, color.white, win, 20)
+        draw_text(output, button_Font, color.white, fake_win, 20)
 
         if(score>=100):
             maxLasers = 2
@@ -385,7 +387,7 @@ def game():
             particle.timer -= 0.05
             particle.vel[1] += 0.1
 
-            pygame.draw.circle(win, particle.color, [int(particle.pos[0]), int(particle.pos[1])+cameraShift], int(particle.timer))
+            pygame.draw.circle(fake_win, particle.color, [int(particle.pos[0]), int(particle.pos[1])+cameraShift], int(particle.timer))
             # Removing old particles 
             if particle.timer <= 0:
                 particles.remove(particle)
@@ -397,7 +399,7 @@ def game():
             particle.timer -= 0.05
             particle.vel[1] += 0.1
 
-            pygame.draw.circle(win, particle.color, [int(particle.pos[0]), int(particle.pos[1])], int(particle.timer))
+            pygame.draw.circle(fake_win, particle.color, [int(particle.pos[0]), int(particle.pos[1])], int(particle.timer))
             # Removing old particles 
             if particle.timer <= 0:
                 other_particles.remove(particle)
@@ -409,6 +411,8 @@ def game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            elif event.type == VIDEORESIZE:
+                win = pygame.display.set_mode(event.size, RESIZABLE | DOUBLEBUF)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     player.dx = -10 
@@ -435,6 +439,7 @@ def game():
         if not player_dead:
             player.drawPlayer(cameraShift)
         
+        win.blit(pygame.transform.scale(fake_win, win.get_rect().size), (0, 0))
         pygame.display.update()
 
     pygame.quit()
@@ -442,7 +447,7 @@ def game():
 checkMusic = True
 
 def menu():
-    global musicOn, checkMusic
+    global musicOn, checkMusic, win, fake_win
     check = ''
     buttons.clear()
 
@@ -462,10 +467,10 @@ def menu():
         pygame.mixer.music.play(-1)
     selected = 0
     while True:
-        win.fill(color.background_color)
+        fake_win.fill(color.background_color)
         
         if random.randint(1, 60) == 1:
-            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+            square_effects.append([[random.randint(0, fake_win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
         for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
             effect[0][1] += effect[2]
             effect[1] += effect[2] * effect[4]
@@ -480,10 +485,10 @@ def menu():
             if effect[3] < 1:
                 square_effects.pop(i)
             else:
-                pygame.draw.polygon(win, color.polygon_color, points, 2)
+                pygame.draw.polygon(fake_win, color.polygon_color, points, 2)
         
-        draw_text('Py-Jump', main_Font, color.moving_color, win, 125)
-        draw_text('Beta 1.1', score_font, color.moving_color, win, 175)
+        draw_text('Py-Jump', main_Font, color.moving_color, fake_win, 125)
+        draw_text('Beta 1.1', score_font, color.moving_color, fake_win, 175)
         
         #mouse = pygame.mouse.get_pos()
         for button in buttons:
@@ -514,6 +519,8 @@ def menu():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == VIDEORESIZE:
+                win = pygame.display.set_mode(event.size, RESIZABLE | DOUBLEBUF)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.quit()
@@ -541,11 +548,12 @@ def menu():
                 if event.key == K_RETURN:
                     check = buttons[selected].text
 
+        win.blit(pygame.transform.scale(fake_win, win.get_rect().size), (0, 0))
         pygame.display.update()
         mainClock.tick(60)
 
 def options():
-    global musicOn, checkMusic, sfxEnabled
+    global musicOn, checkMusic, sfxEnabled, win, fake_win
     buttons.clear()
     check = ''
     #pygame.mixer.music.load(os.path.join(s, "menuMusic.mp3"))
@@ -565,10 +573,10 @@ def options():
 
     selected = 0
     while True:
-        win.fill(color.background_color)
+        fake_win.fill(color.background_color)
         
         if random.randint(1, 60) == 1:
-            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+            square_effects.append([[random.randint(0, fake_win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
         for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
             effect[0][1] += effect[2]
             effect[1] += effect[2] * effect[4]
@@ -583,9 +591,9 @@ def options():
             if effect[3] < 1:
                 square_effects.pop(i)
             else:
-                pygame.draw.polygon(win, color.polygon_color, points, 2)
+                pygame.draw.polygon(fake_win, color.polygon_color, points, 2)
         
-        draw_text('Options', main_Font, color.moving_color, win, 125)
+        draw_text('Options', main_Font, color.moving_color, fake_win, 125)
 
         for button in buttons:
             button.color = color.platform_color
@@ -623,6 +631,8 @@ def options():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == VIDEORESIZE:
+                win = pygame.display.set_mode(event.size, RESIZABLE | DOUBLEBUF)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.quit()
@@ -650,11 +660,12 @@ def options():
                 if event.key == K_RETURN:
                     check = buttons[selected].text
         
+        win.blit(pygame.transform.scale(fake_win, win.get_rect().size), (0, 0))
         pygame.display.update()
         mainClock.tick(60)
 
 def store():
-    global checkMusic
+    global checkMusic, win, fake_win
     buttons.clear()
     back = Button(75, 225, 225, "Back")
         
@@ -663,10 +674,10 @@ def store():
     check = ''
     selected = 0
     while True:
-        win.fill(color.background_color)
+        fake_win.fill(color.background_color)
         
         if random.randint(1, 60) == 1:
-            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+            square_effects.append([[random.randint(0, fake_win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
         for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
             effect[0][1] += effect[2]
             effect[1] += effect[2] * effect[4]
@@ -681,10 +692,10 @@ def store():
             if effect[3] < 1:
                 square_effects.pop(i)
             else:
-                pygame.draw.polygon(win, color.polygon_color, points, 2)
+                pygame.draw.polygon(fake_win, color.polygon_color, points, 2)
         
-        draw_text('Under', button_Font, color.moving_color, win, 125)
-        draw_text('Construction', button_Font, color.moving_color, win, 160)
+        draw_text('Under', button_Font, color.moving_color, fake_win, 125)
+        draw_text('Construction', button_Font, color.moving_color, fake_win, 160)
 
         for button in buttons:
             button.color = color.platform_color
@@ -703,25 +714,29 @@ def store():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == VIDEORESIZE:
+                win = pygame.display.set_mode(event.size, RESIZABLE | DOUBLEBUF)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
                 if event.key == K_RETURN:
                     check = buttons[selected].text
+        
+        win.blit(pygame.transform.scale(fake_win, win.get_rect().size), (0, 0))
         pygame.display.update()
         mainClock.tick(60)
 
 def deathScreen():
-    global score
+    global score, win, fake_win
 
     scoreNotChecked = True
 
     while True:
-        win.fill(color.background_color)
+        fake_win.fill(color.background_color)
 
         if random.randint(1, 60) == 1:
-            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+            square_effects.append([[random.randint(0, fake_win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
         for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
             effect[0][1] += effect[2]
             effect[1] += effect[2] * effect[4]
@@ -736,7 +751,7 @@ def deathScreen():
             if effect[3] < 1:
                 square_effects.pop(i)
             else:
-                pygame.draw.polygon(win, color.polygon_color, points, 2)
+                pygame.draw.polygon(fake_win, color.polygon_color, points, 2)
 
         if(scoreNotChecked):
             try:
@@ -755,26 +770,29 @@ def deathScreen():
             scoreNotChecked = False
 
         if(isHighScore):
-            draw_text('New High Score!', button_Font, color.moving_color, win, 250)
+            draw_text('New High Score!', button_Font, color.moving_color, fake_win, 250)
               
-        draw_text('Score = %d' % score, main_Font, color.moving_color, win, 300)
-        draw_text('ESC to Continue', score_font, color.platform_color, win, 350)
+        draw_text('Score = %d' % score, main_Font, color.moving_color, fake_win, 300)
+        draw_text('ESC to Continue', score_font, color.platform_color, fake_win, 350)
 
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == VIDEORESIZE:
+                win = pygame.display.set_mode(event.size, RESIZABLE | DOUBLEBUF)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     playSound(selectSound)
                     checkMusic = True
                     menu()
 
+        win.blit(pygame.transform.scale(fake_win, win.get_rect().size), (0, 0))
         pygame.display.update()
         mainClock.tick(60)
 
 def areYouSure():
-    global checkMusic
+    global checkMusic, win, fake_win
     buttons.clear()
 
     yes = Button(75, 225, 225, 'Yes')
@@ -786,10 +804,10 @@ def areYouSure():
     selected = 0
     check = ''
     while True:
-        win.fill(color.background_color)
+        fake_win.fill(color.background_color)
 
         if random.randint(1, 60) == 1:
-            square_effects.append([[random.randint(0, win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
+            square_effects.append([[random.randint(0, fake_win.get_width()), -80], random.randint(0, 359), random.randint(10, 30) / 20, random.randint(15, 40), random.randint(10, 30) / 500])
         for i, effect in sorted(enumerate(square_effects), reverse=True): # loc, rot, speed, size, decay
             effect[0][1] += effect[2]
             effect[1] += effect[2] * effect[4]
@@ -804,13 +822,12 @@ def areYouSure():
             if effect[3] < 1:
                 square_effects.pop(i)
             else:
-                pygame.draw.polygon(win, color.polygon_color, points, 2)
+                pygame.draw.polygon(fake_win, color.polygon_color, points, 2)
 
-        draw_text('Are you Sure?', button_Font, color.moving_color, win, 115)
-        draw_text('(This Will Reset', score_font, color.platform_color, win, 155)
-        draw_text('All High Scores)', score_font, color.platform_color, win, 190)
+        draw_text('Are you Sure?', button_Font, color.moving_color, fake_win, 115)
+        draw_text('(This Will Reset', score_font, color.platform_color, fake_win, 155)
+        draw_text('All High Scores)', score_font, color.platform_color, fake_win, 190)
         
-
         for button in buttons:
             button.color = color.platform_color
         check_hover(selected)
@@ -832,6 +849,8 @@ def areYouSure():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == VIDEORESIZE:
+                win = pygame.display.set_mode(event.size, RESIZABLE | DOUBLEBUF)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.quit()
@@ -859,6 +878,7 @@ def areYouSure():
                 if event.key == K_RETURN:
                     check = buttons[selected].text
 
+        win.blit(pygame.transform.scale(fake_win, win.get_rect().size), (0, 0))
         pygame.display.update()
         mainClock.tick(60)
 
