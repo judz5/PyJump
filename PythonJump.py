@@ -26,6 +26,7 @@ cameraShift = 0
 main_Font = pygame.font.Font('dogicapixel.ttf', 60)
 button_Font = pygame.font.Font('dogicapixel.ttf', 30)
 score_font = pygame.font.Font('dogicapixel.ttf', 25)
+name_font = pygame.font.Font('dogicapixel.ttf', 15)
 
 s = 'sound'
 
@@ -348,7 +349,7 @@ def game():
         # Check if player hits platform
         for plat in platforms:
             if plat.y+cameraShift > player.y:
-                if player.rect.colliderect(plat.rect) and player.dy>=0 and player.rect.bottom <= (plat.y+cameraShift+5): # +5 is the tolerance, kinda room for error
+                if player.rect.colliderect(plat.rect) and player.dy>=0 and player.rect.bottom <= (plat.y+cameraShift+8): # +5 is the tolerance, kinda room for error
                     if(plat.type == 0 or plat.type == 3):
                         player.jump()
                         for i in range(5):
@@ -488,7 +489,8 @@ def menu():
                 pygame.draw.polygon(fake_win, color.polygon_color, points, 2)
         
         draw_text('Py-Jump', main_Font, color.moving_color, fake_win, 125)
-        draw_text('Beta 1.1', score_font, color.moving_color, fake_win, 175)
+        draw_text('Beta 1.2', score_font, color.moving_color, fake_win, 175)
+        draw_text('By : Judson Salinas', name_font, color.platform_color, fake_win, 680)
         
         #mouse = pygame.mouse.get_pos()
         for button in buttons:
@@ -763,17 +765,22 @@ def deathScreen():
             if(score>score_data):
                 isHighScore = True
                 with open('score.dat', 'wb') as file:
-                    pickle.dump(score, file) 
+                    pickle.dump(score, file)
+                    file.close()
+                with open('score.dat', 'rb') as file:
+                    score_data = pickle.load(file)
+                    file.close()
             else:
                 isHighScore = False
             
             scoreNotChecked = False
 
         if(isHighScore):
-            draw_text('New High Score!', button_Font, color.moving_color, fake_win, 250)
+            draw_text('New High Score!', button_Font, color.platform_color, fake_win, 250)
               
         draw_text('Score = %d' % score, main_Font, color.moving_color, fake_win, 300)
-        draw_text('ESC to Continue', score_font, color.platform_color, fake_win, 350)
+        draw_text('Current High Score = %d' % score_data, score_font, color.platform_color, fake_win, 355)
+        draw_text('ESC to Continue', score_font, color.platform_color, fake_win, 390)
 
         for event in pygame.event.get():
             if event.type == QUIT:
