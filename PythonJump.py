@@ -36,6 +36,9 @@ deathSound = pygame.mixer.Sound(os.path.join(s, 'death.wav'))
 laserSound = pygame.mixer.Sound(os.path.join(s, "explosion.wav"))
 selectSound = pygame.mixer.Sound(os.path.join(s, "blipSelect.wav"))
 
+
+jumpSound.set_volume(0.5)
+
 musicOn = True
 sfxEnabled = True
 
@@ -280,7 +283,7 @@ def game():
 
     pygame.mixer.music.load(os.path.join(s, "music.mp3"))
     pygame.mixer.music.set_volume(0.25)
-
+    
     if musicOn:
         pygame.mixer.music.play(-1)
 
