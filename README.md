@@ -17,3 +17,7 @@ All you need is Python and Pygame to play, The highscore can be reset in setting
   <img src="img/menu.png" width="350" />
   <img src="img/gameplay.png" width="350" /> 
 </p>
+
+
+![](https://github.com/judz5/PyJump/blob/main/img/pyJumpClip.gif)
+
